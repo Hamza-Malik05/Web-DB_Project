@@ -12,11 +12,11 @@
 	</parent>
 
 	<groupId>com.plant_management</groupId>
-	<artifactId>GrainSync</artifactId>
+	<artifactId>Web_Project</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>plant-management</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Web based ERP application</description>
 
 	<properties>
 		<java.version>17</java.version>
