@@ -2,7 +2,7 @@
 
 Progress Log (pointer)
 - Maintain the detailed, append-only session history in `Documentation.md`. Append a new entry at the top each session.
-
+README file is prone to changes along the way.
 Overview
 --------
 This repository's initial commit is an ORM-based Java Spring Boot backend exposing REST APIs. It is a starter template for a business ERP system providing JPA entities, repositories, basic REST controllers, and configuration scaffolding for HR, Production, Sales, Finance, and Admin modules.
