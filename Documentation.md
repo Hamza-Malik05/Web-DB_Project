@@ -32,6 +32,24 @@ Template for each entry (append at top)
 
 ---
 
+## Entry 01
+- Date: 2026-04-12
+- Time: 7:15 PM
+- Author: `Hamza-Malik05`
+- Summary: Updated database configuration to use PostgreSQL.
+- Files changed / opened:
+  - `pom.xml`
+  - `src/main/resources/application.properties`
+- State: working
+- Next steps:
+  - Test the application with the updated PostgreSQL configuration.
+  - Verify database connectivity and query execution.
+  - Update any SQL scripts or queries to be compatible with PostgreSQL syntax if necessary.
+- Notes:
+  - Replaced MySQL dependency with PostgreSQL in `pom.xml`.
+  - Updated `application.properties` with PostgreSQL connection details.
+
+
 ## Guidelines / Best practices
 - Append new entries at the top; do not rewrite history.
 - Include exact commands and any error output when blocked.
