@@ -49,6 +49,23 @@ Template for each entry (append at top)
   - Replaced MySQL dependency with PostgreSQL in `pom.xml`.
   - Updated `application.properties` with PostgreSQL connection details.
 
+## Entry 02
+- Date: 2026-04-12
+- Time: 10:22 PM
+- Author: `Hamza-Malik05`
+- Summary: Updated `database.sql` and added `procedures.sql` for database procedures.
+- Files changed / opened:
+  - `database.sql`
+  - `procedures.sql`
+- State: working
+- Next steps:
+  - Test the new procedures in `procedures.sql` for correctness.
+  - Verify the database schema updates in `database.sql`.
+  - Ensure compatibility with the application code.
+  - Ensure the connection of the application to the database is working correctly with the new schema and procedures.
+- Notes:
+  - Added new procedures for creating bills and registering users in `procedures.sql`.
+  - Updated `database.sql` with schema changes and initial data.
 
 ## Guidelines / Best practices
 - Append new entries at the top; do not rewrite history.
