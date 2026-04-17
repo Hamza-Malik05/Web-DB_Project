@@ -67,6 +67,31 @@ Template for each entry (append at top)
   - Added new procedures for creating bills and registering users in `procedures.sql`.
   - Updated `database.sql` with schema changes and initial data.
 
+## Entry 03
+- Date: 2026-04-17
+- Time: 11:20 AM
+- Author: `Hamza-Malik05`
+- Summary: Created PostgreSQL database `Flour_mill` and verified JDBC connection from the application tests.
+- Files changed / opened:
+  - `database.sql`
+  - `procedures.sql`
+  - `src/main/resources/application.properties`
+  - `.env`
+  - `src/test/java/.../DbConnectionTest.java`
+- State: working
+- Next steps:
+  - Run full integration tests against `Flour_mill`.
+  - Execute and validate stored procedures in `procedures.sql`.
+  - Remove credentials from repo and switch to secure secret management.
+  - Convert the application classes to use JDBC templates or raw SQL queries instead of JPA for better performance and control.
+- Notes:
+  - DBMS: PostgreSQL (ver. 18.3)
+  - Case sensitivity: plain=lower, delimited=exact
+  - Driver: PostgreSQL JDBC Driver (ver. 42.7.3, JDBC4.2)
+  - Ping: 102 ms
+  - SSL: no
+  - Test: `DbConnectionTest` executed successfully; application established a JDBC connection using the configured datasource (`src/main/resources/application.properties` / `.env`). \- No sensitive values recorded in this log.
+  - Commands used: `mvn -Dtest=DbConnectionTest test` and validation via `psql` client for schema inspection.
 ## Guidelines / Best practices
 - Append new entries at the top; do not rewrite history.
 - Include exact commands and any error output when blocked.
