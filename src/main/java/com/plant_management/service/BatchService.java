@@ -3,7 +3,6 @@ package com.plant_management.service;
 import com.plant_management.dto.BatchRequestDTO;
 import com.plant_management.model.*;
 import com.plant_management.dao.*;
-import org.hibernate.engine.jdbc.batch.spi.Batch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,13 +14,13 @@ import java.util.Optional;
 public class BatchService {
 
     @Autowired
-    private BatchRepository batchRepository;
+    private BatchDao batchDao; // replaced BatchRepository
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private EmployeeDao employeeDao; // use DAO or repository present in project
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductRepository productRepository; // keep existing repository if present
 
     @Autowired
     private RawMaterialInventoryStorageRepository rawMaterialInventoryStorageRepository;
@@ -30,9 +29,8 @@ public class BatchService {
     private ProductInventoryStorageRepository productInventoryStorageRepository;
 
     public Batches saveBatch(Batches batch, Integer employee_id, Integer product_id, Integer r_storage_unit_id) {
-
-        // Set employee and product
-        Employee employee = employeeRepository.findById(employee_id)
+        // unchanged business logic before saving; at the end use batchDao.save(...)
+        Employee employee = employeeDao.findById(employee_id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
         Products product = productRepository.findById(product_id)
@@ -41,7 +39,6 @@ public class BatchService {
         batch.setEmployee(employee);
         batch.setProduct(product);
 
-        // Adjust raw material quantity
         RawMaterialInventoryStorage rawStorage = rawMaterialInventoryStorageRepository.findById(r_storage_unit_id)
                 .orElseThrow(() -> new RuntimeException("Raw material storage unit not found"));
 
@@ -52,7 +49,6 @@ public class BatchService {
         rawStorage.setQuantity_stored(rawStorage.getQuantity_stored() - batch.getQuantity_used());
         rawMaterialInventoryStorageRepository.save(rawStorage);
 
-        // Adjust product inventory (add to produced quantity)
         List<ProductInventoryStorage> productUnits = productInventoryStorageRepository
                 .findByProducts(product);
 
@@ -60,7 +56,6 @@ public class BatchService {
             throw new RuntimeException("No product storage units found for this product.");
         }
 
-        // Find a unit with enough capacity to store the produced quantity
         ProductInventoryStorage suitableUnit = productUnits.stream()
                 .filter(unit -> unit.getCapacity() - unit.getQuantity_stored() >= batch.getQuantity_produced())
                 .findFirst()
@@ -68,11 +63,12 @@ public class BatchService {
 
         suitableUnit.setQuantity_stored(suitableUnit.getQuantity_stored() + batch.getQuantity_produced());
         productInventoryStorageRepository.save(suitableUnit);
-        // Save batch record
-        return batchRepository.save(batch);
+
+        return batchDao.save(batch);
     }
+
     public ResponseEntity<?> logBatch(BatchRequestDTO dto) {
-        Optional<Employee> employeeOpt = employeeRepository.findById(Math.toIntExact(dto.getEmployee_id()));
+        Optional<Employee> employeeOpt = employeeDao.findById(Math.toIntExact(dto.getEmployee_id()));
         Optional<Products> productOpt = productRepository.findById(Math.toIntExact(dto.getProduct_id()));
 
         if (employeeOpt.isEmpty() || productOpt.isEmpty()) {
@@ -83,7 +79,6 @@ public class BatchService {
                 .orElse(null);
         ProductInventoryStorage productStorage = productInventoryStorageRepository.findById(Math.toIntExact(dto.getP_storage_unit_id()))
                 .orElse(null);
-        System.out.println("Product ID: " + dto.getProduct_id());
 
         if (rawStorage == null || productStorage == null) {
             return ResponseEntity.badRequest().body("Invalid storage unit.");
@@ -93,34 +88,30 @@ public class BatchService {
             return ResponseEntity.badRequest().body("Insufficient raw material in storage.");
         }
 
-        // Update storage quantities
         rawStorage.setQuantity_stored(rawStorage.getQuantity_stored() - dto.getQuantity_used());
         productStorage.setQuantity_stored(productStorage.getQuantity_stored() + dto.getQuantity_produced());
         rawMaterialInventoryStorageRepository.save(rawStorage);
         productInventoryStorageRepository.save(productStorage);
 
-        // Save the batch
         Batches batch = new Batches();
         batch.setEmployee(employeeOpt.get());
         batch.setProduct(productOpt.get());
         batch.setQuantity_used(dto.getQuantity_used());
         batch.setQuantity_produced(dto.getQuantity_produced());
 
-
-        return ResponseEntity.ok(batchRepository.save(batch));
+        return ResponseEntity.ok(batchDao.save(batch));
     }
 
-
     public List<Batches> getAllBatches() {
-        return batchRepository.findAll();
+        return batchDao.findAll();
     }
 
     public Batches getBatchById(Integer id) {
-        return batchRepository.findById(id).orElse(null);
+        return batchDao.findById(id).orElse(null);
     }
 
     public void deleteBatch(Integer id) {
-        batchRepository.deleteById(id);
+        batchDao.deleteById(id);
     }
 
     public List<Products> getAllProducts() {

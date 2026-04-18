@@ -3,7 +3,6 @@ package com.plant_management.controller;
 import com.plant_management.dto.BatchRequestDTO;
 import com.plant_management.model.Batches;
 import com.plant_management.service.BatchService;
-import org.hibernate.engine.jdbc.batch.spi.Batch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
