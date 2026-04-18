@@ -124,6 +124,27 @@ Template for each entry (append at top)
   - `register_user_from_employee` stored procedure enforces one-user-per-employee and assigns role by department.
   - Use `mvnw.cmd` on Windows; run tests with `mvn -Dtest=<TestName> test`.
 
+##  Entry 05
+- Date: 2026-04-18
+- Time: 2:19 PM
+- Author: `Hamza-Malik05`
+- Summary: Implemented JdbcTemplate-backed persistence and service layer for Accountant; updated REST controller and ensured consistency with the DAO/Service refactor (continued migration away from JPA).
+- Files changed / opened:
+  - `src/main/java/com/plant_management/dao/AccountantDao.java`
+  - `src/main/java/com/plant_management/service/AccountantService.java`
+  - `src/main/java/com/plant_management/controller/AccountantController.java`
+  - `src/main/java/com/plant_management/controller/EmployeeController.java`
+  - `Documentation.md`
+- State: working
+- Next steps:
+  - Run unit and integration tests for accountant endpoints .
+  - Verify `accountants` table migrations and generated keys in PostgreSQL.
+  - Add `EmployeeDao` lookups in `AccountantDao` to populate `employee` when required.
+  - Continue removing JPA dependencies from `pom.xml` and validate full build.
+- Notes:
+  - Replaced JPA repositories with `JdbcTemplate` DAOs; used `RowMapper` and `GeneratedKeyHolder` for inserts.
+  - Controller uses the service layer; ensured DI is consistent to avoid autowiring issues.
+  - Use `mvnw.cmd` on Windows or `mvn` to run tests and start the application.
 ## Guidelines / Best practices
 - Append new entries at the top; do not rewrite history.
 - Include exact commands and any error output when blocked.

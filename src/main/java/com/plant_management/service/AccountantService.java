@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
 import com.plant_management.model.Accountant;
-import com.plant_management.dao.AccountantRepository;
+import com.plant_management.dao.AccountantDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,21 +12,21 @@ import java.util.Optional;
 public class AccountantService {
 
     @Autowired
-    private AccountantRepository accountantRepository;
+    private AccountantDao accountantDao;
 
     public List<Accountant> getAllAccountants() {
-        return accountantRepository.findAll();
+        return accountantDao.findAll();
     }
 
     public Optional<Accountant> getAccountantById(int id) {
-        return accountantRepository.findById(id);
+        return accountantDao.findById(id);
     }
 
     public Accountant saveAccountant(Accountant accountant) {
-        return accountantRepository.save(accountant);
+        return accountantDao.save(accountant);
     }
 
     public void deleteAccountant(int id) {
-        accountantRepository.deleteById(id);
+        accountantDao.deleteById(id);
     }
 }
