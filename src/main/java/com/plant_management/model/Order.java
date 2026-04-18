@@ -1,19 +1,17 @@
 package com.plant_management.model;
 
-import jakarta.persistence.*;
+
 import lombok.*;
 
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "orders")
-@Getter
-@Setter
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
 
-    @Id
+
     private Integer order_id;
 
     private Integer customer_id;

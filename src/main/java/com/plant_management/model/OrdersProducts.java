@@ -1,21 +1,17 @@
 package com.plant_management.model;
 
-import jakarta.persistence.*;
+
 import lombok.*;
 
-@Entity
-@Table(name = "orders_products")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(OrdersProductsId.class)
+
 public class OrdersProducts {
 
-    @Id
+
     private Integer order_id;
 
-    @Id
     private Integer product_id;
 
     private Float quantity;

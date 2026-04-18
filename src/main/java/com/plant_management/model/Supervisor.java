@@ -1,6 +1,6 @@
 package com.plant_management.model;
 
-import jakarta.persistence.*;
+
 import lombok.*;
 
 @Entity

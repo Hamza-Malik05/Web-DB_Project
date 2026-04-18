@@ -1,18 +1,13 @@
 package com.plant_management.model;
 
-import jakarta.persistence.*;
+
 import lombok.*;
 
-@Entity
-@Table(name = "customers")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer customer_id;
 
     private String customer_name;

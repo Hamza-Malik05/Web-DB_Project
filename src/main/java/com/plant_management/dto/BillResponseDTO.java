@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class BillResponseDTO {
@@ -19,14 +19,7 @@ public class BillResponseDTO {
     private String bill_type;
     private String payment_method;
 
-    public BillResponseDTO(Integer bill_id, BigDecimal amount, LocalDate issue_date, LocalDate due_date, String bill_type, String payment_method) {
-        this.bill_id = bill_id;
-        this.amount = amount;
-        this.issue_date = issue_date;
-        this.due_date = due_date;
-        this.bill_type = bill_type;
-        this.payment_method = payment_method;
-    }
+
 
     // Getters & Setters (or @Data Lombok if preferred)
 }

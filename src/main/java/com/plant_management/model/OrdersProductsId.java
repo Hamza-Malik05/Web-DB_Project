@@ -5,8 +5,7 @@ import lombok.*;
 import java.io.Serializable;
 import java.util.Objects;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrdersProductsId implements Serializable {

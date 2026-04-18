@@ -1,18 +1,15 @@
 package com.plant_management.model;
 
-import jakarta.persistence.*;
+
 import lombok.*;
 
-@Entity
-@Table(name = "vehicles")
-@Getter
-@Setter
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vehicle {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Integer vehicle_id;
 
     private String type;
@@ -23,7 +20,6 @@ public class Vehicle {
 
     private Float capacity;
 
-    @Enumerated(EnumType.STRING)
     private Status status;
 
     public enum Status {

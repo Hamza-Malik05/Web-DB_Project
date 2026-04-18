@@ -145,6 +145,53 @@ Template for each entry (append at top)
   - Replaced JPA repositories with `JdbcTemplate` DAOs; used `RowMapper` and `GeneratedKeyHolder` for inserts.
   - Controller uses the service layer; ensured DI is consistent to avoid autowiring issues.
   - Use `mvnw.cmd` on Windows or `mvn` to run tests and start the application.
+
+## Entry 06
+- Date: 2026-04-18
+- Time: 3:45 PM
+- Author: `Hamza-Malik05`
+- Summary: Converted Batch and Attendance repositories to JdbcTemplate DAOs; fixed `AttendanceService` save/batch logic and corrected method call typos; updated services to use DAOs and ensured transactional handling.
+- Files changed / opened:
+  - `src/main/java/com/plant_management/dao/BatchDao.java`
+  - `src/main/java/com/plant_management/service/BatchService.java`
+  - `src/main/java/com/plant_management/dao/AttendanceDao.java`
+  - `src/main/java/com/plant_management/service/AttendanceService.java`
+  - `src/main/java/com/plant_management/dao/AccountantDao.java`
+  - `src/main/java/com/plant_management/service/AccountantService.java`
+  - `src/main/java/com/plant_management/dao/EmployeeDao.java`
+  - `src/main/java/com/plant_management/controller/AuthorizationController.java`
+  - `src/main/java/com/plant_management/dto/BatchRequestDTO.java`
+  - `Documentation.md`
+- State: working
+- Next steps:
+  - Run targeted tests: `mvn -Dtest=Attendance* test` and `mvn -Dtest=Batch* test` (use `mvnw.cmd` on Windows).
+  - Verify generated keys and schema compatibility for `batches` and `attendance` tables in PostgreSQL.
+  - Populate nested `employee` / `product` objects in DAOs (use `EmployeeDao` / `ProductDao` lookups) where full objects are required.
+  - Remove remaining JPA dependencies from `pom.xml` and run full build.
+- Notes:
+  - Replaced JPA repositories with `JdbcTemplate` DAOs; used `RowMapper`, `PreparedStatementCreator`, and `GeneratedKeyHolder` for inserts/updates.
+  - `AttendanceService.initializeAttendanceForDate` now creates and saves records individually to avoid unsupported `saveAll` usage.
+  - `BatchService` now delegates persistence to `BatchDao` and continues to update storage units via repositories.
+  - Use `mvnw.cmd` on Windows and ensure database migrations are applied before running integration tests.
+
+## Entry 07
+- Date: 2026-04-18
+- Time: 7:03 PM
+- Author: `Hamza-Malik05`
+- Summary: Added documentation entry for recent DAO/service refactorings and model updates.
+- Files changed / opened:
+  - Remaining Model files.
+- State: working
+- Next steps:
+  - Change the JPA Repository Interfaces to JdbcTemplate DAOs for the remaining entities.
+  - Remove remaining JPA dependencies from `pom.xml` and run full build.
+- Notes:
+  - Continued migration from JPA to `JdbcTemplate` DAOs; ensured insert/update key handling with `GeneratedKeyHolder`.
+  - `AttendanceService.initializeAttendanceForDate` now saves records individually to avoid unsupported `saveAll` usage.
+  - New/updated POJOs: `Vehicle`, `Bill`, `Customer` (basic fields present); confirm mapping in DAOs if persisted.
+  - Commands used: `mvnw.cmd -Dtest=Attendance* test`, `psql` for quick schema checks.
+---
+
 ## Guidelines / Best practices
 - Append new entries at the top; do not rewrite history.
 - Include exact commands and any error output when blocked.

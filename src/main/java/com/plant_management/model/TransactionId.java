@@ -1,10 +1,9 @@
 package com.plant_management.model;
 import lombok.*;
-import jakarta.persistence.*;
 
-@Embeddable
-@Getter
-@Setter
+
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionId implements java.io.Serializable {

@@ -2,20 +2,13 @@ package com.plant_management.model;
 
 import lombok.*;
 
-import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 public class Products {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Integer product_id;
 
     private String name;
