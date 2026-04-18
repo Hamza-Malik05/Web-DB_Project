@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Delivery;
+import com.plant_management.model.Delivery;
 import com.plant_management.service.DeliveryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Vehicle;
+import com.plant_management.model.Vehicle;
 import com.plant_management.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Supervisor;
+import com.plant_management.model.Supervisor;
 import com.plant_management.service.SupervisorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

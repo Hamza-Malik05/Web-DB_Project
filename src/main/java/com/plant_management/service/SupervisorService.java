@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Supervisor;
-import com.plant_management.repository.SupervisorRepository;
+import com.plant_management.model.Supervisor;
+import com.plant_management.dao.SupervisorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

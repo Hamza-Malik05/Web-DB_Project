@@ -1,11 +1,11 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Employee;
-import com.plant_management.entity.Salaries;
-import com.plant_management.entity.Transaction;
-import com.plant_management.repository.EmployeeRepository;
-import com.plant_management.repository.SalaryRepository;
-import com.plant_management.repository.TransactionRepository;
+import com.plant_management.model.Employee;
+import com.plant_management.model.Salaries;
+import com.plant_management.model.Transaction;
+import com.plant_management.dao.EmployeeRepository;
+import com.plant_management.dao.SalaryRepository;
+import com.plant_management.dao.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

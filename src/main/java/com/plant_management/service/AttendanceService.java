@@ -1,9 +1,9 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Attendance;
-import com.plant_management.entity.Employee;
-import com.plant_management.repository.AttendanceRepository;
-import com.plant_management.repository.EmployeeRepository;
+import com.plant_management.model.Attendance;
+import com.plant_management.model.Employee;
+import com.plant_management.dao.AttendanceRepository;
+import com.plant_management.dao.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +14,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

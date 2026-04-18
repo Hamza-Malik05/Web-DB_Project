@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Vehicle;
-import com.plant_management.repository.VehicleRepository;
+import com.plant_management.model.Vehicle;
+import com.plant_management.dao.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

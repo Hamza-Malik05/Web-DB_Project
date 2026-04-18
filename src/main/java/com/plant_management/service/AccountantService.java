@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Accountant;
-import com.plant_management.repository.AccountantRepository;
+import com.plant_management.model.Accountant;
+import com.plant_management.dao.AccountantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

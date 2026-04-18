@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Salaries;
+import com.plant_management.model.Salaries;
 import com.plant_management.service.SalaryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;

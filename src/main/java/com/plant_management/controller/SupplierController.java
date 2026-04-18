@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Supplier;
+import com.plant_management.model.Supplier;
 import com.plant_management.service.SupplierService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

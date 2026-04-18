@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Supplier;
-import com.plant_management.repository.SupplierRepository;
+import com.plant_management.model.Supplier;
+import com.plant_management.dao.SupplierRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

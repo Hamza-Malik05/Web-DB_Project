@@ -1,8 +1,8 @@
 package com.plant_management.service;
 
 import com.plant_management.dto.PurchaseResponseDTO;
-import com.plant_management.entity.Purchase;
-import com.plant_management.repository.PurchaseRepository;
+import com.plant_management.model.Purchase;
+import com.plant_management.dao.PurchaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

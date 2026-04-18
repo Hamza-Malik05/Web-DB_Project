@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Transaction;
-import com.plant_management.repository.TransactionRepository;
+import com.plant_management.model.Transaction;
+import com.plant_management.dao.TransactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

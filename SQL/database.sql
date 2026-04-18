@@ -61,7 +61,7 @@ CREATE TABLE driver (
 
 -- ACCOUNTANTS
 CREATE TABLE accountant (
-                            accountant_id INT AUTO_INCREMENT PRIMARY KEY,
+                            accountant_id SERIAL PRIMARY KEY,
                             employee_id INT,
                             domain VARCHAR(100),
                             CONSTRAINT fk_accountant_employee
@@ -247,7 +247,7 @@ CREATE TABLE attendance (
                             date DATE,
                             clock_in TIME,
                             clock_out TIME,
-                            status attendance_status
+                            status attendance_status,
                             CONSTRAINT fk_attendance_employee
                             FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
                                 ON DELETE CASCADE

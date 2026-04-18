@@ -1,14 +1,13 @@
 package com.plant_management.service;
 
 import com.plant_management.dto.BatchRequestDTO;
-import com.plant_management.entity.*;
-import com.plant_management.repository.*;
+import com.plant_management.model.*;
+import com.plant_management.dao.*;
 import org.hibernate.engine.jdbc.batch.spi.Batch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

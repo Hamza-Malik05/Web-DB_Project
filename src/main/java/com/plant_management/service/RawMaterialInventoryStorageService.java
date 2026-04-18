@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.RawMaterialInventoryStorage;
-import com.plant_management.repository.RawMaterialInventoryStorageRepository;
+import com.plant_management.model.RawMaterialInventoryStorage;
+import com.plant_management.dao.RawMaterialInventoryStorageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

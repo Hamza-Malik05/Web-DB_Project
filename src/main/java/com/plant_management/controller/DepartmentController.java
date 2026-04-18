@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Department;
+import com.plant_management.model.Department;
 import com.plant_management.service.DepartmentService;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/departments")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 
 public class DepartmentController {

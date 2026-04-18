@@ -1,7 +1,7 @@
 package com.plant_management.controller;
 
 import com.plant_management.dto.RegisterUserFromEmployeeRequest;
-import com.plant_management.entity.User;
+import com.plant_management.model.User;
 import com.plant_management.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 public class UserController {
 

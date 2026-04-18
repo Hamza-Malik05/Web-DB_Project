@@ -1,17 +1,16 @@
 package com.plant_management.controller;
 
 import com.plant_management.dto.ProductInventoryDTO;
-import com.plant_management.entity.ProductInventoryStorage;
-import com.plant_management.entity.Products;
-import com.plant_management.repository.ProductRepository;
-import com.plant_management.repository.ProductInventoryStorageRepository;
+import com.plant_management.model.ProductInventoryStorage;
+import com.plant_management.model.Products;
+import com.plant_management.dao.ProductRepository;
+import com.plant_management.dao.ProductInventoryStorageRepository;
 import com.plant_management.service.ProductInventoryStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/product-inventory-storage")

@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Driver;
-import com.plant_management.repository.DriverRepository;
+import com.plant_management.model.Driver;
+import com.plant_management.dao.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,9 +1,9 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Department;
-import com.plant_management.entity.Employee;
-import com.plant_management.repository.DepartmentRepository;
-import com.plant_management.repository.EmployeeRepository;
+import com.plant_management.model.Department;
+import com.plant_management.model.Employee;
+import com.plant_management.dao.DepartmentDao;
+import com.plant_management.dao.EmployeeDao;
 import com.plant_management.service.EmployeeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,18 +14,18 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/employees")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 
 public class EmployeeController {
-    private final EmployeeRepository employeeRepository;
+    private final EmployeeDao employeeDao;
     private final EmployeeService employeeService;
-    private final DepartmentRepository departmentRepository;
+    private final DepartmentDao departmentDao;
 
-    public EmployeeController(EmployeeService employeeService, DepartmentRepository departmentRepository,EmployeeRepository employeeRepository) {
+    public EmployeeController(EmployeeService employeeService, DepartmentDao departmentDao,EmployeeDao employeeDao) {
         this.employeeService = employeeService;
-        this.departmentRepository = departmentRepository;
-        this.employeeRepository=employeeRepository;
+        this.departmentDao = departmentDao;
+        this.employeeDao= employeeDao;
     }
 
     @GetMapping("/production")
@@ -39,7 +39,7 @@ public class EmployeeController {
     }
     @GetMapping("/debug/unregistered-employees")
     public ResponseEntity<List<Employee>> debugUnregistered() {
-        List<Employee> result = employeeRepository.findEmployeesNotRegisteredAsUsers();
+        List<Employee> result = employeeDao.findEmployeesNotRegisteredAsUsers();
         return ResponseEntity.ok(result);
     }
 
@@ -59,10 +59,9 @@ public class EmployeeController {
         employee.setAbsences(0);
         employee.setLeaves(21);
 
-        if (employee.getDepartment() != null && employee.getDepartment().getDept_id() != null) {
-            Department department = departmentRepository.findById(employee.getDepartment().getDept_id())
+        if (employee.getDept_id() != null) {
+            Department department = departmentDao.findById(employee.getDept_id())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid Department ID"));
-            employee.setDepartment(department);
         }
 
         Employee savedEmployee = employeeService.saveEmployee(employee);
@@ -72,10 +71,9 @@ public class EmployeeController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEmployee(@PathVariable Integer id, @RequestBody Employee updatedEmployee) {
         try {
-            if (updatedEmployee.getDepartment() != null && updatedEmployee.getDepartment().getDept_id() != null) {
-                Department department = departmentRepository.findById(updatedEmployee.getDepartment().getDept_id())
+            if (updatedEmployee.getDept_id() != null) {
+                Department department = departmentDao.findById(updatedEmployee.getDept_id())
                         .orElseThrow(() -> new IllegalArgumentException("Invalid Department ID"));
-                updatedEmployee.setDepartment(department);
             }
             Employee employee = employeeService.updateEmployee(id, updatedEmployee);
             return ResponseEntity.ok(employee);

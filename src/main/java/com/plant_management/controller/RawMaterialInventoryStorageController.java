@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.RawMaterialInventoryStorage;
+import com.plant_management.model.RawMaterialInventoryStorage;
 import com.plant_management.service.RawMaterialInventoryStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

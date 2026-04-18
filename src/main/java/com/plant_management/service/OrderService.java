@@ -2,12 +2,12 @@ package com.plant_management.service;
 
 import com.plant_management.dto.OrderProductDTO;
 import com.plant_management.dto.OrderRequestDTO;
-import com.plant_management.entity.*;
-import com.plant_management.repository.CustomerRepository;
-import com.plant_management.repository.OrderRepository;
-import com.plant_management.repository.OrdersProductsRepository;
-import com.plant_management.repository.ProductInventoryStorageRepository;
-import com.plant_management.repository.ProductRepository;
+import com.plant_management.model.*;
+import com.plant_management.dao.CustomerRepository;
+import com.plant_management.dao.OrderRepository;
+import com.plant_management.dao.OrdersProductsRepository;
+import com.plant_management.dao.ProductInventoryStorageRepository;
+import com.plant_management.dao.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

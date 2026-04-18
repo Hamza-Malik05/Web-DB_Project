@@ -1,11 +1,11 @@
 package com.plant_management.controller;
 
-import com.plant_management.repository.UserRepository;
+import com.plant_management.dao.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.plant_management.entity.User;
+import com.plant_management.model.User;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,14 +18,14 @@ import java.util.Optional;
 public class AuthorizationController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserDao userDao;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
         String username = loginData.get("username");
         String password = loginData.get("password");
 
-        Optional<User> userOpt = userRepository.findByUsername(username);
+        Optional<User> userOpt = userDao.findByUsername(username);
         if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
             User user = userOpt.get();
             return ResponseEntity.ok().body(Map.of(

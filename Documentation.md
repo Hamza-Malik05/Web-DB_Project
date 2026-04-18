@@ -92,6 +92,38 @@ Template for each entry (append at top)
   - SSL: no
   - Test: `DbConnectionTest` executed successfully; application established a JDBC connection using the configured datasource (`src/main/resources/application.properties` / `.env`). \- No sensitive values recorded in this log.
   - Commands used: `mvn -Dtest=DbConnectionTest test` and validation via `psql` client for schema inspection.
+
+## Entry 04
+- Date: 2026-04-18
+- Time: 1:04 PM
+- Author: `Hamza-Malik05`
+- Summary: Refactored persistence for User, Employee, and Department to JdbcTemplate-based DAOs; removed JPA annotations; implemented stored-procedure-based user registration.
+- Files changed / opened:
+  - `src/main/java/com/plant_management/model/Users.java`
+  - `src/main/java/com/plant_management/dao/UserDao.java`
+  - `src/main/java/com/plant_management/service/UserService.java`
+  - `src/main/java/com/plant_management/controller/UserController.java`
+  -  `src/main/java/com/plant_management/model/Department.java`
+  - `src/main/java/com/plant_management/dao/DepartmentDao.java`
+  - `src/main/java/com/plant_management/service/DepartmentService.java`
+  - `src/main/java/com/plant_management/controller/DepartmentController.java`
+  -  `src/main/java/com/plant_management/model/Employee.java`
+  - `src/main/java/com/plant_management/dao/EmployeeDao.java`
+  - `src/main/java/com/plant_management/service/EmployeeService.java`
+  - `src/main/java/com/plant_management/controller/EmployeeController.java`
+
+- State: working
+- Next steps:
+  - Run unit and integration tests for user and employee endpoints.
+  - Verify `register_user_from_employee` stored procedure on the PostgreSQL instance.
+  - Add `EmployeeDao`/`DepartmentDao` mapping to load `employee` in `UserDao` if needed.
+  - Remove remaining JPA dependencies from `pom.xml` and validate build.
+- Notes:
+  - Replaced JPA entities with plain POJOs and `JdbcTemplate`-backed DAOs.
+  - Implemented full CRUD in `UserDao`; `UserService` now delegates to DAO and handles transactions.
+  - `register_user_from_employee` stored procedure enforces one-user-per-employee and assigns role by department.
+  - Use `mvnw.cmd` on Windows; run tests with `mvn -Dtest=<TestName> test`.
+
 ## Guidelines / Best practices
 - Append new entries at the top; do not rewrite history.
 - Include exact commands and any error output when blocked.

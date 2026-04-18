@@ -1,8 +1,8 @@
 package com.plant_management.controller;
 
 import com.plant_management.dto.OrderRequestDTO;
-import com.plant_management.entity.Order;
-import com.plant_management.entity.Products;
+import com.plant_management.model.Order;
+import com.plant_management.model.Products;
 import com.plant_management.service.BatchService;
 import com.plant_management.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 @RestController
 @RequestMapping("/api/orders")

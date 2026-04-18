@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Customer;
-import com.plant_management.repository.CustomerRepository;
+import com.plant_management.model.Customer;
+import com.plant_management.dao.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -2,19 +2,16 @@ package com.plant_management.service;
 
 import com.plant_management.dto.BillRequestDTO;
 import com.plant_management.dto.BillResponseDTO;
-import com.plant_management.entity.Accountant;
-import com.plant_management.entity.Bill;
-import com.plant_management.entity.Transaction;
-import com.plant_management.repository.AccountantRepository;
-import com.plant_management.repository.BillRepository;
-import com.plant_management.repository.TransactionRepository;
+import com.plant_management.model.Bill;
+import com.plant_management.dao.AccountantRepository;
+import com.plant_management.dao.BillRepository;
+import com.plant_management.dao.TransactionRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 

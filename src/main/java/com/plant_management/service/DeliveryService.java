@@ -1,9 +1,9 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Delivery;
-import com.plant_management.entity.Order;
-import com.plant_management.repository.DeliveryRepository;
-import com.plant_management.repository.OrderRepository;
+import com.plant_management.model.Delivery;
+import com.plant_management.model.Order;
+import com.plant_management.dao.DeliveryRepository;
+import com.plant_management.dao.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

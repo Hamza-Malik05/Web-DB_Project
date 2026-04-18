@@ -1,8 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Employee;
-import com.plant_management.repository.EmployeeRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
+import com.plant_management.model.Employee;
+import com.plant_management.dao.EmployeeDao;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,46 +10,50 @@ import java.util.Optional;
 @Service
 public class EmployeeService {
 
-    private final EmployeeRepository employeeRepository;
+    private final EmployeeDao employeeDao;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
-        this.employeeRepository = employeeRepository;
+    public EmployeeService(EmployeeDao employeeDao) {
+        this.employeeDao = employeeDao;
     }
 
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+        return employeeDao.findAll();
     }
 
     public Employee saveEmployee(Employee employee) {
-        return employeeRepository.save(employee);
+        return employeeDao.insert(employee);
     }
 
     public List<Employee> getUnregisteredEmployees() {
-        return employeeRepository.findEmployeesNotRegisteredAsUsers();
+        return employeeDao.findEmployeesNotRegisteredAsUsers();
     }
     public void deleteEmployee(Integer id) {
-        employeeRepository.deleteById(id);
+        employeeDao.delete(id);
     }
 
     public Optional<Employee> getEmployeeById(Integer id) {
-        return employeeRepository.findById(id);
+        return employeeDao.findById(id);
     }
 
     public Employee updateEmployee(Integer id, Employee updatedEmployee) {
         // Ensure the employee exists
-        employeeRepository.findById(id)
+        employeeDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
         // Directly save the updated employee with the provided ID
         updatedEmployee.setEmployee_id(id); // Ensure the ID is set
-        return employeeRepository.save(updatedEmployee);
+        int rows = employeeDao.update(updatedEmployee);
+        if (rows == 0) {
+            throw new RuntimeException("Failed to update employee");
+        }
+        return updatedEmployee;
     }
 
     public List<Employee> getProductionEmployees() {
-        return employeeRepository.findEmployeesInProduction();
+        return employeeDao.findEmployeesInProduction();
     }
 
     public List<Employee> getSalesReps() {
-        return employeeRepository.findSalesReps();
+        return employeeDao.findSalesReps();
     }
 }
