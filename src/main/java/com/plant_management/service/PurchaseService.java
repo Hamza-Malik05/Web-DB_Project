@@ -2,7 +2,7 @@ package com.plant_management.service;
 
 import com.plant_management.dto.PurchaseResponseDTO;
 import com.plant_management.model.Purchase;
-import com.plant_management.dao.PurchaseRepository;
+import com.plant_management.dao.PurchaseDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 public class PurchaseService {
 
     @Autowired
-    private PurchaseRepository purchaseRepository;
+    private PurchaseDao purchaseDao;
 
     public List<PurchaseResponseDTO> getAllPurchases() {
-        List<Purchase> purchases = purchaseRepository.findAll();
+        List<Purchase> purchases = purchaseDao.findAll();
 
         return purchases.stream()
                 .map(purchase -> new PurchaseResponseDTO(
@@ -35,14 +35,14 @@ public class PurchaseService {
 
 
     public Optional<Purchase> getPurchaseById(Integer id) {
-        return purchaseRepository.findById(id);
+        return purchaseDao.findById(id);
     }
 
     public Purchase savePurchase(Purchase purchase) {
-        return purchaseRepository.save(purchase);
+        return purchaseDao.save(purchase);
     }
 
     public void deletePurchase(Integer id) {
-        purchaseRepository.deleteById(id);
+        purchaseDao.deleteById(id);
     }
 }

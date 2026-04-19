@@ -3,8 +3,8 @@ package com.plant_management.controller;
 import com.plant_management.dto.ProductInventoryDTO;
 import com.plant_management.model.ProductInventoryStorage;
 import com.plant_management.model.Products;
-import com.plant_management.dao.ProductRepository;
-import com.plant_management.dao.ProductInventoryStorageRepository;
+import com.plant_management.dao.ProductDao;
+import com.plant_management.dao.ProductInventoryStorageDao;
 import com.plant_management.service.ProductInventoryStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/product-inventory-storage")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 public class ProductInventoryStorageController {
 
@@ -22,10 +22,10 @@ public class ProductInventoryStorageController {
     private ProductInventoryStorageService service;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductDao productDao;
 
     @Autowired
-    private ProductInventoryStorageRepository productInventoryStorageRepository;
+    private ProductInventoryStorageDao productInventoryStorageDao;
 
     // Get all storage units
     @GetMapping
@@ -51,7 +51,7 @@ public class ProductInventoryStorageController {
     @PostMapping
     public ResponseEntity<?> createStorageUnit(@RequestBody ProductInventoryStorage unit) {
         if (unit.getProducts() != null && unit.getProducts().getProduct_id() != null) {
-            Products product = productRepository.findById(unit.getProducts().getProduct_id()).orElse(null);
+            Products product = productDao.findById(unit.getProducts().getProduct_id()).orElse(null);
             if (product == null) return ResponseEntity.badRequest().body("Invalid product_id.");
             unit.setProducts(product);
         }
@@ -65,7 +65,7 @@ public class ProductInventoryStorageController {
             unit.setP_storage_unit_id(id);
 
             if (unit.getProducts() != null && unit.getProducts().getProduct_id() != null) {
-                Products product = productRepository.findById(unit.getProducts().getProduct_id()).orElse(null);
+                Products product = productDao.findById(unit.getProducts().getProduct_id()).orElse(null);
                 if (product == null) return ResponseEntity.badRequest().body("Invalid product_id.");
                 unit.setProducts(product);
             }

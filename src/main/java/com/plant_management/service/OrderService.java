@@ -1,16 +1,17 @@
+// java
 package com.plant_management.service;
 
 import com.plant_management.dto.OrderProductDTO;
 import com.plant_management.dto.OrderRequestDTO;
 import com.plant_management.model.*;
-import com.plant_management.dao.CustomerRepository;
-import com.plant_management.dao.OrderRepository;
-import com.plant_management.dao.OrdersProductsRepository;
-import com.plant_management.dao.ProductInventoryStorageRepository;
-import com.plant_management.dao.ProductRepository;
-import jakarta.transaction.Transactional;
+import com.plant_management.dao.CustomerDao;
+import com.plant_management.dao.OrderDao;
+import com.plant_management.dao.OrdersProductsDao;
+import com.plant_management.dao.ProductInventoryStorageDao;
+import com.plant_management.dao.ProductDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,43 +21,43 @@ import java.util.Optional;
 public class OrderService {
 
     @Autowired
-    private OrderRepository orderRepository;
+    private OrderDao orderDao;
 
     @Autowired
-    private ProductInventoryStorageRepository productInventoryStorageRepository;
+    private ProductInventoryStorageDao productInventoryStorageDao;
 
     @Autowired
-    private OrdersProductsRepository ordersProductsRepository;
+    private OrdersProductsDao ordersProductsDao;
 
     @Autowired
-    private CustomerRepository customersRepository;
+    private CustomerDao customersDao;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductDao productDao;
 
     public Order saveOrder(Order order) {
-        return orderRepository.save(order);
+        return orderDao.save(order);
     }
 
     public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+        return orderDao.findAll();
     }
 
     public Optional<Order> getOrderById(int orderId) {
-        return orderRepository.findById(orderId);
+        return orderDao.findById(orderId);
     }
 
     public void deleteOrder(int orderId) {
-        orderRepository.deleteById(orderId);
+        orderDao.deleteById(orderId);
     }
 
     @Transactional
     public void createOrderWithProducts(OrderRequestDTO orderRequest) {
         try {
-            Customer customer = customersRepository.findById(orderRequest.getCustomer_id())
+            Customer customer = customersDao.findById(orderRequest.getCustomer_id())
                     .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-            Integer nextOrderId = orderRepository.findMaxOrderId() + 1;
+            Integer nextOrderId = orderDao.findMaxOrderId().orElse(0) + 1;
 
             Order order = new Order();
             order.setOrder_id(nextOrderId);
@@ -66,7 +67,7 @@ public class OrderService {
             order.setStatus("pending");
             order.setAddress(customer.getAddress());
 
-            Order savedOrder = orderRepository.save(order);
+            Order savedOrder = orderDao.save(order);
 
             for (OrderProductDTO productDTO : orderRequest.getProducts()) {
                 int productId = productDTO.getProduct_id();
@@ -77,13 +78,13 @@ public class OrderService {
                 op.setOrder_id(savedOrder.getOrder_id());
                 op.setProduct_id(productId);
                 op.setQuantity(quantityOrdered);
-                ordersProductsRepository.save(op);
+                ordersProductsDao.save(op);
 
                 // Fetch product and inventory
-                Products product = productRepository.findById(productId)
+                Products product = productDao.findById(productId)
                         .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
 
-                List<ProductInventoryStorage> inventoryList = productInventoryStorageRepository.findByProducts(product);
+                List<ProductInventoryStorage> inventoryList = productInventoryStorageDao.findByProducts(product);
                 if (inventoryList.isEmpty()) {
                     throw new RuntimeException("No inventory found for product ID: " + productId);
                 }
@@ -105,12 +106,12 @@ public class OrderService {
                     float available = storage.getQuantity_stored();
                     if (available >= remainingToDeduct) {
                         storage.setQuantity_stored(available - remainingToDeduct);
-                        productInventoryStorageRepository.save(storage);
+                        productInventoryStorageDao.save(storage);
                         break;
                     } else {
                         storage.setQuantity_stored(0f);
                         remainingToDeduct -= available;
-                        productInventoryStorageRepository.save(storage);
+                        productInventoryStorageDao.save(storage);
                     }
                 }
             }
@@ -120,18 +121,18 @@ public class OrderService {
     }
 
     public List<Order> getPendingOrders() {
-        return orderRepository.findByStatus("pending");
+        return orderDao.findByStatus("pending");
     }
 
     public List<Order> getInDeliveryOrders() {
-        return orderRepository.findByStatus("in_delivery");
+        return orderDao.findByStatus("in_delivery");
     }
 
     public List<Order> getDeliveredOrders() {
-        return orderRepository.findByStatus("delivered");
+        return orderDao.findByStatus("delivered");
     }
 
     public List<Order> getCancelledOrders() {
-        return orderRepository.findByStatus("cancelled");
+        return orderDao.findByStatus("cancelled");
     }
 }

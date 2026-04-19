@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 public class TransactionId implements java.io.Serializable {
     private Integer transactionNumber;
-    private Integer accountantId;
+    private Integer accountant_id;
 }

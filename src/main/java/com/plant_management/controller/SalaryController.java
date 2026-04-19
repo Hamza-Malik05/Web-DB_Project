@@ -8,12 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/salaries")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 public class SalaryController {
 
@@ -23,7 +24,7 @@ public class SalaryController {
     @PostMapping
     public ResponseEntity<Salaries> createSalary(
             @RequestParam Integer employeeId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd")Date date,
             @RequestParam BigDecimal baseAmount,
             @RequestParam BigDecimal bonus,
             @RequestParam BigDecimal fine,

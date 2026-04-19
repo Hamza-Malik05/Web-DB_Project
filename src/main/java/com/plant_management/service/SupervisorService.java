@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
 import com.plant_management.model.Supervisor;
-import com.plant_management.dao.SupervisorRepository;
+import com.plant_management.dao.SupervisorDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,31 +12,31 @@ import java.util.Optional;
 public class SupervisorService {
 
     @Autowired
-    private SupervisorRepository supervisorRepository;
+    private SupervisorDao supervisorDao;
 
     public Supervisor createSupervisor(Supervisor supervisor) {
-        return supervisorRepository.save(supervisor);
+        return supervisorDao.save(supervisor);
     }
 
     public Supervisor getSupervisorById(Integer id) {
-        return supervisorRepository.findById(id).orElse(null);
+        return supervisorDao.findById(id).orElse(null);
     }
 
     public List<Supervisor> getAllSupervisors() {
-        return supervisorRepository.findAll();
+        return supervisorDao.findAll();
     }
 
     public Supervisor updateSupervisor(Integer id, Supervisor updatedSupervisor) {
-        Optional<Supervisor> optional = supervisorRepository.findById(id);
+        Optional<Supervisor> optional = supervisorDao.findById(id);
         if (optional.isPresent()) {
-            updatedSupervisor.setSupervisorId(id);
-            return supervisorRepository.save(updatedSupervisor);
+            updatedSupervisor.setSupervisor_id(id);
+            return supervisorDao.save(updatedSupervisor);
         } else {
             return null;
         }
     }
 
     public void deleteSupervisor(Integer id) {
-        supervisorRepository.deleteById(id);
+        supervisorDao.deleteById(id);
     }
 }

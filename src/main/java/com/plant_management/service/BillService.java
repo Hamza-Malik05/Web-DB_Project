@@ -3,65 +3,68 @@ package com.plant_management.service;
 import com.plant_management.dto.BillRequestDTO;
 import com.plant_management.dto.BillResponseDTO;
 import com.plant_management.model.Bill;
-import com.plant_management.dao.AccountantRepository;
-import com.plant_management.dao.BillRepository;
-import com.plant_management.dao.TransactionRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
+import com.plant_management.dao.AccountantDao;
+import com.plant_management.dao.BillDao;
+import com.plant_management.dao.TransactionDao;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class BillService {
-    @PersistenceContext
-    private EntityManager entityManager;
 
-    private final BillRepository billRepository;
-    private final TransactionRepository transactionRepository;
-    private final AccountantRepository accountantRepository;
+    private final BillDao billDao;
+    private final TransactionDao transactionDao;
+    private final AccountantDao accountantDao;
+    private final JdbcTemplate jdbcTemplate;
 
-    public BillService(BillRepository billRepository,
-                       TransactionRepository transactionRepository,
-                       AccountantRepository accountantRepository) {
-        this.billRepository = billRepository;
-        this.transactionRepository = transactionRepository;
-        this.accountantRepository = accountantRepository;
+    // Injecting the new DAOs and JdbcTemplate instead of Repositories and EntityManager
+    public BillService(BillDao billDao,
+                       TransactionDao transactionDao,
+                       AccountantDao accountantDao,
+                       JdbcTemplate jdbcTemplate) {
+        this.billDao = billDao;
+        this.transactionDao = transactionDao;
+        this.accountantDao = accountantDao;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     // Get all bills with custom response
     public List<BillResponseDTO> getAllBills() {
-        return billRepository.findAllBillDetails();
+        return billDao.findAllBillDetails();
     }
 
     // Create Bill (and corresponding Transaction)
     @Transactional
     public void createBillViaProcedure(BillRequestDTO dto) {
-        entityManager.createNativeQuery("CALL create_new_bill(?, ?, ?, ?, ?, ?)")
-                .setParameter(1, dto.getAmount())
-                .setParameter(2, dto.getAccountant_id())
-                .setParameter(3, dto.getPayment_method())
-                .setParameter(4, dto.getBill_type())
-                .setParameter(5, dto.getIssue_date())
-                .setParameter(6, dto.getDue_date())
-                .executeUpdate();
+        // Replaced EntityManager.createNativeQuery with JdbcTemplate.update
+        String sql = "CALL create_new_bill(?, ?, ?, ?, ?, ?)";
+
+        jdbcTemplate.update(sql,
+                dto.getAmount(),
+                dto.getAccountant_id(),
+                dto.getPayment_method(),
+                dto.getBill_type(),
+                dto.getIssue_date(),
+                dto.getDue_date()
+        );
     }
 
     // Get Bill by ID
     public Optional<Bill> getBillById(Integer id) {
-        return billRepository.findById(id);
+        return billDao.findById(id);
     }
 
     // Save bill (direct)
     public Bill saveBill(Bill bill) {
-        return billRepository.save(bill);
+        return billDao.save(bill);
     }
 
     // Delete bill
     public void deleteBill(Integer id) {
-        billRepository.deleteById(id);
+        billDao.deleteById(id);
     }
 }

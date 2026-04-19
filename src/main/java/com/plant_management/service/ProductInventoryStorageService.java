@@ -4,7 +4,7 @@ package com.plant_management.service;
 import com.plant_management.dto.ProductInventoryDTO;
 import com.plant_management.model.ProductInventoryStorage;
 
-import com.plant_management.dao.ProductInventoryStorageRepository;
+import com.plant_management.dao.ProductInventoryStorageDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class ProductInventoryStorageService {
 
     @Autowired
-    private ProductInventoryStorageRepository repository;
+private ProductInventoryStorageDao repository;
 
     public List<ProductInventoryStorage> getAllUnits() {
         return repository.findAll();

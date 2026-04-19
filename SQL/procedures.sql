@@ -83,3 +83,104 @@ BEGIN
     END IF;
 END;
 $$;
+
+-- 3. Finding drivers by their ids.
+CREATE OR REPLACE FUNCTION get_driver_info(
+    p_driver_id INT DEFAULT NULL
+)
+    RETURNS TABLE (
+                      driver_id INT,
+                      employee_id INT,
+                      first_name VARCHAR(50),
+                      last_name VARCHAR(50),
+                      license_no VARCHAR(50),
+                      cnic VARCHAR(20)
+                  )
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- 1. Safety check to ensure at least one parameter is provided
+    IF p_driver_id IS NULL THEN
+        RAISE EXCEPTION 'You must provide a driver_id';
+    END IF;
+
+    -- 2. Return the matching driver and their employee details
+    RETURN QUERY
+        SELECT
+            d.driver_id,
+            d.employee_id,
+            e.first_name,
+            e.last_name,
+            d.license_no,
+            e.cnic
+        FROM driver d
+                 JOIN employee e ON d.employee_id = e.employee_id
+        WHERE (p_driver_id IS NOT NULL AND d.driver_id = p_driver_id);
+END;
+$$;
+
+-- Function 1: Get Salary by Employee ID and Date
+CREATE OR REPLACE FUNCTION get_salary_by_employee_and_date(
+    p_employee_id INT,
+    p_date DATE
+)
+    RETURNS TABLE (
+                      salary_id INT,
+                      transaction_id INT,
+                      employee_id INT,
+                      bonus NUMERIC,
+                      fine NUMERIC
+                  )
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+        SELECT s.salary_id, s.transaction_id, s.employee_id, s.bonus, s.fine
+        FROM salaries s
+                 JOIN transactions t ON s.transaction_id = t.transaction_id
+        WHERE s.employee_id = p_employee_id AND t.date_of_transaction = p_date;
+END;
+$$;
+
+
+-- Function 2: Get All Salaries by Date
+CREATE OR REPLACE FUNCTION get_salaries_by_date(
+    p_date DATE
+)
+    RETURNS TABLE (
+                      salary_id INT,
+                      transaction_id INT,
+                      employee_id INT,
+                      bonus NUMERIC,
+                      fine NUMERIC
+                  )
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+        SELECT s.salary_id, s.transaction_id, s.employee_id, s.bonus, s.fine
+        FROM salaries s
+                 JOIN transactions t ON s.transaction_id = t.transaction_id
+        WHERE t.date_of_transaction = p_date;
+END;
+$$;
+
+-- Function 3: Get All Bill Details
+CREATE OR REPLACE FUNCTION get_all_bill_details()
+    RETURNS TABLE (
+                      bill_id INT,
+                      amount NUMERIC,
+                      issue_date TIMESTAMP,
+                      due_date TIMESTAMP,
+                      bill_type VARCHAR,
+                      payment_method VARCHAR
+                  )
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+        SELECT b.bill_id, t.amount, b.issue_date, b.due_date, b.bill_type, t.payment_method
+        FROM bills b
+                 JOIN transactions t ON b.transaction_id = t.transaction_id;
+END;
+$$;

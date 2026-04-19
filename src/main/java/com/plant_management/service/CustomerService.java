@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
 import com.plant_management.model.Customer;
-import com.plant_management.dao.CustomerRepository;
+import com.plant_management.dao.CustomerDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,26 +11,26 @@ import java.util.List;
 public class CustomerService {
 
     @Autowired
-    private CustomerRepository customerRepository;
+    private CustomerDao customerDao;
 
     public Customer addCustomer(Customer customer) {
-        return customerRepository.save(customer);
+        return customerDao.save(customer);
     }
 
     public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+        return customerDao.findAll();
     }
 
     public Customer getCustomerById(int id) {
-        return customerRepository.findById(id).orElse(null);
+        return customerDao.findById(id).orElse(null);
     }
 
     public Customer updateCustomer(int id, Customer updatedCustomer) {
         updatedCustomer.setCustomer_id(id);
-        return customerRepository.save(updatedCustomer);
+        return customerDao.save(updatedCustomer);
     }
 
     public void deleteCustomer(int id) {
-        customerRepository.deleteById(id);
+        customerDao.deleteById(id);
     }
 }

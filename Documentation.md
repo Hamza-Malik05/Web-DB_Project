@@ -192,6 +192,58 @@ Template for each entry (append at top)
   - Commands used: `mvnw.cmd -Dtest=Attendance* test`, `psql` for quick schema checks.
 ---
 
+## Entry 08
+- Date: 2026-04-18
+- Time: 9:16 PM
+- Author: Hamza-Malik05
+- Summary: Converted several repositories to JdbcTemplate DAOs; fixed RowMapper mappings, enum handling and insert/update key handling; updated service logic to use DAOs consistently (orders, transactions, suppliers) and adjusted delivery flows to use OrderDao.
+- Files changed / opened:
+  - src/main/java/com/plant_management/dao/TransactionDao.java
+  - src/main/java/com/plant_management/dao/SupplierDao.java
+  - src/main/java/com/plant_management/dao/OrderDao.java
+  - src/main/java/com/plant_management/service/OrderService.java
+  - src/main/java/com/plant_management/service/DeliveryService.java
+  - src/main/java/com/plant_management/dao/EmployeeDao.java
+  - src/main/java/com/plant_management/service/ProductService.java
+- State: working
+- Next steps:
+  - Run unit and integration tests: mvnw.cmd -Dtest=Order* test, mvnw.cmd -Dtest=Delivery* test.
+  - Convert remaining JPA repositories to DAOs (notably DeliveryRepository, ProductRepository) and update ProductService/controllers to use DAOs.
+  - Resolve any failing tests and adjust DAO RowMappers to populate nested objects where required.
+  - Remove leftover JPA dependencies from pom.xml and validate full build.
+- Notes:
+  - Environment: Windows, PostgreSQL.
+  - Commands used: mvnw.cmd -Dtest=DbConnectionTest test, mvnw.cmd -Dtest=Order* test.
+  - Observations: GeneratedKeyHolder used for inserts; ensure database schema sequences/PK behavior matches insert expectations.
+---
+## Entry 09
+- Date: 2026-04-19
+- Time: 2:54 PM
+- Author: Hamza-Malik05
+- Summary: Migrated Salary, Bill, Product and other repositories to JDBC DAOs with PostgreSQL functions for complex joins and fixed date/time parsing.
+- Files changed / opened:
+  - src/main/java/com/plant_management/dao/SalariesDao.java
+  - src/main/java/com/plant_management/dao/BillDao.java
+  - src/main/java/com/plant_management/dao/ProductDao.java
+  - src/main/java/com/plant_management/service/BillService.java
+  - src/main/java/com/plant_management/service/ProductService.java
+  - src/main/java/com/plant_management/model/Bill.java
+  - src/main/java/com/plant_management/model/Salaries.java
+  - All other remaining Model, DAO and Service files for consistency.
+- State: working
+- Next steps:
+  - Execute SQL scripts to create get_salary_by_employee_and_date, get_salaries_by_date, and get_all_bill_details functions in PostgreSQL.
+  - Update the database schema to support the create_new_bill procedure called in BillService.
+  - Verify BillResponseDTO constructor matches the updated RowMapper logic for LocalDate conversion.
+  - Test the backend for optimal and working functionality with the new DAOs and database functions.
+- Notes:
+- Environment: Windows, PostgreSQL.
+  - Implemented explicit PostgreSQL RETURNS TABLE functions to replace JPA @Query annotations for Salaries and Bill joins.
+  - Resolved Cannot resolve method 'valueOf(Date)' error by converting java.util.Date to java.sql.Date using .getTime().
+  - Added manual Timestamp to LocalDate parsing in BillDao to ensure compatibility with BillResponseDTO.
+  - Refactored BillService and ProductService to use constructor-based injection for DAOs instead of field-based @Autowired.
+---
+
 ## Guidelines / Best practices
 - Append new entries at the top; do not rewrite history.
 - Include exact commands and any error output when blocked.

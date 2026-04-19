@@ -3,9 +3,9 @@ package com.plant_management.service;
 import com.plant_management.model.Employee;
 import com.plant_management.model.Salaries;
 import com.plant_management.model.Transaction;
-import com.plant_management.dao.EmployeeRepository;
-import com.plant_management.dao.SalaryRepository;
-import com.plant_management.dao.TransactionRepository;
+import com.plant_management.dao.EmployeeDao;
+import com.plant_management.dao.SalariesDao;
+import com.plant_management.dao.TransactionDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,24 +21,24 @@ import java.util.Optional;
 public class SalaryService {
 
     @Autowired
-    private SalaryRepository salaryRepository;
+    private SalariesDao salariesDao;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private EmployeeDao employeeDao;
 
     @Autowired
-    private TransactionRepository transactionRepository;
+    private TransactionDao transactionDao;
 
     @Autowired
     private AccountantService accountantService;
 
     @Transactional
     public Salaries createSalary(Integer employeeId, Date date, BigDecimal baseAmount, BigDecimal bonus, BigDecimal fine, Integer accountantId, String paymentMethod) {
-        Employee employee = employeeRepository.findById(employeeId)
+        Employee employee = employeeDao.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
         // Check if salary already exists for this date
-        Optional<Salaries> existingSalary = salaryRepository.findByEmployeeIdAndDate(employeeId, date);
+        Optional<Salaries> existingSalary = salariesDao.findByEmployeeIdAndDate(employeeId, date);
         if (existingSalary.isPresent()) {
             throw new RuntimeException("Salary already exists for this date");
         }
@@ -54,7 +54,7 @@ public class SalaryService {
         transaction.setDate_of_transaction(date);
         transaction.setPayment_method(paymentMethod);
         transaction.setAccountant(accountant);
-        transaction = transactionRepository.save(transaction);
+        transaction = transactionDao.save(transaction);
 
         // Create salary record with the saved transaction
         Salaries salary = new Salaries();
@@ -63,7 +63,7 @@ public class SalaryService {
         salary.setBonus(bonus);
         salary.setFine(fine);
 
-        return salaryRepository.save(salary);
+        return salariesDao.save(salary);
     }
 
     @Transactional
@@ -72,7 +72,7 @@ public class SalaryService {
 
         try {
             // Find the salary record
-            Salaries salary = salaryRepository.findById(salaryId)
+            Salaries salary = salariesDao.findById(salaryId)
                     .orElseThrow(() -> new RuntimeException("Salary record not found"));
             log.info("Found salary record: {}", salary);
 
@@ -93,13 +93,13 @@ public class SalaryService {
 
             // Update transaction
             transaction.setAmount(newTotalAmount);
-            Transaction savedTransaction = transactionRepository.save(transaction);
+            Transaction savedTransaction = transactionDao.save(transaction);
             log.info("Saved transaction with new amount: {}", savedTransaction.getAmount());
 
             // Update salary
             salary.setBonus(bonus);
             salary.setFine(fine);
-            Salaries savedSalary = salaryRepository.save(salary);
+            Salaries savedSalary = salariesDao.save(salary);
             log.info("Saved salary with new values - Bonus: {}, Fine: {}", savedSalary.getBonus(), savedSalary.getFine());
 
             return savedSalary;
@@ -110,19 +110,19 @@ public class SalaryService {
     }
 
     public List<Salaries> getAllSalaries() {
-        return salaryRepository.findAll();
+        return salariesDao.findAll();
     }
 
     public List<Salaries> getSalariesByDate(Date date) {
-        return salaryRepository.findAllByDate(date);
+        return salariesDao.findAllByDate(date);
     }
 
     public List<Salaries> getSalariesByEmployee(Integer employeeId) {
-        return salaryRepository.findAllByEmployeeId(employeeId);
+        return salariesDao.findAllByEmployeeId(employeeId);
     }
 
     public Salaries getSalaryById(Integer salaryId) {
-        return salaryRepository.findById(salaryId)
+        return salariesDao.findById(salaryId)
                 .orElseThrow(() -> new RuntimeException("Salary record not found"));
     }
 }

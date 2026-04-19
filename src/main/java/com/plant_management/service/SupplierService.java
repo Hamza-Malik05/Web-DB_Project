@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
 import com.plant_management.model.Supplier;
-import com.plant_management.dao.SupplierRepository;
+import com.plant_management.dao.SupplierDao;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,24 +9,24 @@ import java.util.List;
 @Service
 public class SupplierService {
 
-    private final SupplierRepository supplierRepository;
+    private final SupplierDao supplierDao;
 
-    public SupplierService(SupplierRepository supplierRepository) {
-        this.supplierRepository = supplierRepository;
+    public SupplierService(SupplierDao supplierDao) {
+        this.supplierDao = supplierDao;
     }
 
     public List<Supplier> getAllSuppliers() {
-        return supplierRepository.findAll();
+        return supplierDao.findAll();
     }
 
     public Supplier getSupplierById(Integer id) {
-        return supplierRepository.findById(id).orElseThrow(
+        return supplierDao.findById(id).orElseThrow(
                 () -> new RuntimeException("Supplier not found with ID: " + id)
         );
     }
 
     public Supplier saveSupplier(Supplier supplier) {
-        return supplierRepository.save(supplier);
+        return supplierDao.save(supplier);
     }
 
     public Supplier updateSupplier(Integer id, Supplier supplierDetails) {
@@ -36,10 +36,10 @@ public class SupplierService {
         existingSupplier.setPhone(supplierDetails.getPhone());
         existingSupplier.setAddress(supplierDetails.getAddress());
         existingSupplier.setCity(supplierDetails.getCity());
-        return supplierRepository.save(existingSupplier);
+        return supplierDao.save(existingSupplier);
     }
 
     public void deleteSupplierById(Integer id) {
-        supplierRepository.deleteById(id);
+        supplierDao.deleteById(id);
     }
 }

@@ -8,7 +8,7 @@ import lombok.*;
 public class Driver {
 
 
-    private int driverId;
+    private Integer driver_id;
 
     private Employee employee;
 

@@ -20,26 +20,26 @@ public class BatchService {
     private EmployeeDao employeeDao; // use DAO or repository present in project
 
     @Autowired
-    private ProductRepository productRepository; // keep existing repository if present
+    private ProductDao productDao; // keep existing repository if present
 
     @Autowired
-    private RawMaterialInventoryStorageRepository rawMaterialInventoryStorageRepository;
+    private RawMaterialInventoryStorageDao rawMaterialInventoryStorageDao;
 
     @Autowired
-    private ProductInventoryStorageRepository productInventoryStorageRepository;
+    private ProductInventoryStorageDao productInventoryStorageDao;
 
     public Batches saveBatch(Batches batch, Integer employee_id, Integer product_id, Integer r_storage_unit_id) {
         // unchanged business logic before saving; at the end use batchDao.save(...)
         Employee employee = employeeDao.findById(employee_id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
-        Products product = productRepository.findById(product_id)
+        Products product = productDao.findById(product_id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         batch.setEmployee(employee);
         batch.setProduct(product);
 
-        RawMaterialInventoryStorage rawStorage = rawMaterialInventoryStorageRepository.findById(r_storage_unit_id)
+        RawMaterialInventoryStorage rawStorage = rawMaterialInventoryStorageDao.findById(r_storage_unit_id)
                 .orElseThrow(() -> new RuntimeException("Raw material storage unit not found"));
 
         if (rawStorage.getQuantity_stored() < batch.getQuantity_used()) {
@@ -47,9 +47,9 @@ public class BatchService {
         }
 
         rawStorage.setQuantity_stored(rawStorage.getQuantity_stored() - batch.getQuantity_used());
-        rawMaterialInventoryStorageRepository.save(rawStorage);
+        rawMaterialInventoryStorageDao.save(rawStorage);
 
-        List<ProductInventoryStorage> productUnits = productInventoryStorageRepository
+        List<ProductInventoryStorage> productUnits = productInventoryStorageDao
                 .findByProducts(product);
 
         if (productUnits.isEmpty()) {
@@ -62,22 +62,22 @@ public class BatchService {
                 .orElseThrow(() -> new RuntimeException("No product storage unit has enough capacity."));
 
         suitableUnit.setQuantity_stored(suitableUnit.getQuantity_stored() + batch.getQuantity_produced());
-        productInventoryStorageRepository.save(suitableUnit);
+        productInventoryStorageDao.save(suitableUnit);
 
         return batchDao.save(batch);
     }
 
     public ResponseEntity<?> logBatch(BatchRequestDTO dto) {
         Optional<Employee> employeeOpt = employeeDao.findById(Math.toIntExact(dto.getEmployee_id()));
-        Optional<Products> productOpt = productRepository.findById(Math.toIntExact(dto.getProduct_id()));
+        Optional<Products> productOpt = productDao.findById(Math.toIntExact(dto.getProduct_id()));
 
         if (employeeOpt.isEmpty() || productOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Invalid employee or product ID.");
         }
 
-        RawMaterialInventoryStorage rawStorage = rawMaterialInventoryStorageRepository.findById(Math.toIntExact(dto.getR_storage_unit_id()))
+        RawMaterialInventoryStorage rawStorage = rawMaterialInventoryStorageDao.findById(Math.toIntExact(dto.getR_storage_unit_id()))
                 .orElse(null);
-        ProductInventoryStorage productStorage = productInventoryStorageRepository.findById(Math.toIntExact(dto.getP_storage_unit_id()))
+        ProductInventoryStorage productStorage = productInventoryStorageDao.findById(Math.toIntExact(dto.getP_storage_unit_id()))
                 .orElse(null);
 
         if (rawStorage == null || productStorage == null) {
@@ -90,8 +90,8 @@ public class BatchService {
 
         rawStorage.setQuantity_stored(rawStorage.getQuantity_stored() - dto.getQuantity_used());
         productStorage.setQuantity_stored(productStorage.getQuantity_stored() + dto.getQuantity_produced());
-        rawMaterialInventoryStorageRepository.save(rawStorage);
-        productInventoryStorageRepository.save(productStorage);
+        rawMaterialInventoryStorageDao.save(rawStorage);
+        productInventoryStorageDao.save(productStorage);
 
         Batches batch = new Batches();
         batch.setEmployee(employeeOpt.get());
@@ -115,6 +115,6 @@ public class BatchService {
     }
 
     public List<Products> getAllProducts() {
-        return productRepository.findAll();
+        return productDao.findAll();
     }
 }

@@ -2,7 +2,7 @@ package com.plant_management.model;
 
 import lombok.*;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 
 @Data
@@ -13,8 +13,8 @@ public class Bill {
 
 
     private Integer bill_id;
-    private LocalDate issue_date;
-    private LocalDate due_date;
+    private Date issue_date;
+    private Date due_date;
     private String bill_type;
     private Transaction transaction;
 

@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
 import com.plant_management.model.Sale;
-import com.plant_management.dao.SaleRepository;
+import com.plant_management.dao.SaleDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,25 +12,25 @@ import java.util.Optional;
 public class SaleService {
 
     @Autowired
-    private SaleRepository saleRepository;
+    private SaleDao saleDao;
 
     public List<Sale> getAllSales() {
-        return saleRepository.findAll();
+        return saleDao.findAll();
     }
 
     public Optional<Sale> getSaleById(int sale_id) {
-        return saleRepository.findById(sale_id);
+        return saleDao.findById(sale_id);
     }
 
     public Sale addSale(Sale sale) {
-        return saleRepository.save(sale);
+        return saleDao.save(sale);
     }
 
     public void deleteSale(int sale_id) {
-        saleRepository.deleteById(sale_id);
+        saleDao.deleteById(sale_id);
     }
 
     public Sale updateSale(Sale sale) {
-        return saleRepository.save(sale);
+        return saleDao.save(sale);
     }
 }
