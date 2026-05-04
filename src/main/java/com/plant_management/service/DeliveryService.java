@@ -32,7 +32,7 @@ public class DeliveryService {
     @Transactional
     public Delivery createDelivery(Delivery delivery) {
         Order order = delivery.getOrder();
-        order.setStatus("in_delivery");
+        order.setStatus(Order.OrderStatus.valueOf("shipped"));
         orderDao.save(order);
 
         return deliveryDao.save(delivery);
@@ -60,7 +60,7 @@ public class DeliveryService {
         deliveryDao.save(delivery);
 
         Order order = delivery.getOrder();
-        order.setStatus("delivered");
+        order.setStatus(Order.OrderStatus.valueOf("delivered"));
         orderDao.save(order);
     }
 
@@ -70,7 +70,7 @@ public class DeliveryService {
                 .orElseThrow(() -> new RuntimeException("Delivery not found"));
 
         Order order = delivery.getOrder();
-        order.setStatus("cancelled");
+        order.setStatus(Order.OrderStatus.valueOf("cancelled"));
         orderDao.save(order);
 
         deliveryDao.delete(deliveryId);
@@ -78,7 +78,7 @@ public class DeliveryService {
 
     public List<Delivery> getPendingDeliveries() {
         // Get all orders that are pending and don't have a delivery record
-        List<Order> pendingOrders = orderDao.findByStatus("pending");
+        List<Order> pendingOrders = orderDao.findByStatus(Order.OrderStatus.valueOf("pending"));
         for (Order order : pendingOrders) {
             if (!deliveryDao.existsByOrder(order)) {
                 Delivery newDelivery = new Delivery();

@@ -62,7 +62,7 @@ public class SupervisorDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"supervisor_id"});
 
             // Handle Employee Foreign Key
             if (supervisor.getEmployee() != null && supervisor.getEmployee().getEmployee_id() != null && supervisor.getEmployee().getEmployee_id() > 0) {

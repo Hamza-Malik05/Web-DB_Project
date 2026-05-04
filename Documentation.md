@@ -243,7 +243,53 @@ Template for each entry (append at top)
   - Added manual Timestamp to LocalDate parsing in BillDao to ensure compatibility with BillResponseDTO.
   - Refactored BillService and ProductService to use constructor-based injection for DAOs instead of field-based @Autowired.
 ---
-
+## Entry 10 
+- Date: 2026-05-03
+- Time: 5:30 PM
+- Author: Hamza-Malik05
+- Summary: Addressed PostgreSQL strict typing issues with custom Enums across DAOs and SQL procedures. Created the `v_delivery_details` database view to simplify complex JOINS for deliveries. Updated `DeliveryDao`, `OrderDao`, and `VehicleDao` RowMappers to handle nested object mappings safely, convert SQL Dates to LocalDates, and map database strings to Java Enums using case-insensitive loops to prevent `IllegalArgumentException`. Fixed `GeneratedKeyHolder` across DAOs by specifying the ID column array for PostgreSQL. Added `VehicleType` and `OrderStatus` enums to model classes.
+- Files changed / opened:
+  - src/main/java/com/plant_management/dao/DeliveryDao.java
+  - src/main/java/com/plant_management/dao/OrderDao.java
+  - src/main/java/com/plant_management/dao/VehicleDao.java
+  - src/main/java/com/plant_management/model/Order.java
+  - src/main/java/com/plant_management/model/Vehicle.java
+  - Database schema (Updated `create_new_bill` procedure, created `v_delivery_details` view)
+- State: working
+- Next steps:
+  - Test frontend integration with the newly populated nested JSON responses for deliveries.
+  - Convert any remaining JPA repositories to DAOs (e.g., ProductRepository) and update associated services/controllers.
+  - Run full suite of unit and integration tests to verify database View and explicit enum casting work smoothly across all endpoints.
+- Notes:
+  - Environment: Windows, PostgreSQL.
+  - Observations: PostgreSQL requires explicit casting (`?::enum_type`) for PreparedStatements when working with custom ENUM types. Created a database view for `DeliveryDao` to drastically reduce JDBC query complexity while properly populating nested `Order`, `Vehicle`, and `Driver` objects. Used case-insensitive iteration for mapping DB strings to Java Enums to handle format mismatches (e.g., "Under Maintenance" to `UNDER_MAINTENANCE`).
+---
+## Entry 11
+- Date: 2026-05-04
+- Time: 2:15 AM
+- Author: Hamza-Malik05
+- Summary: Refactored Product Inventory management and Driver information retrieval; implemented database views and PostgreSQL functions for cleaner DAO logic. Fixed critical service-level bugs related to manual ID assignment and dependency injection.
+- Files changed / opened:
+  - src/main/java/com/plant_management/dao/ProductInventoryStorageDao.java
+  - src/main/java/com/plant_management/dao/DriverDao.java
+  - src/main/java/com/plant_management/service/OrderService.java
+  - src/main/java/com/plant_management/service/BatchService.java
+  - src/main/java/com/plant_management/controller/OrderController.java
+  - src/main/java/com/plant_management/controller/DriverController.java
+- State: working
+- Next steps:
+  - Audit all Service classes to ensure Constructor Injection is used instead of manual instantiation (`new Service()`).
+  - Verify FIFO logic for stock deduction across multiple storage units in `OrderService`.
+  - Update frontend components to utilize the new `v_product_inventory_storage` view attributes.
+- Notes:
+  - Environment: Windows, PostgreSQL.
+  - Fixes:
+    - Resolved `FK` constraint violation in `orders_products` by removing manual ID calculation and relying on `KeyHolder` generated keys.
+    - Created `v_product_inventory_storage` view to handle product joins, simplifying the `ProductInventoryStorageDao` RowMapper.
+    - Updated `DriverDao` to use `get_driver_info(NULL)` for a unified `findAll` approach via stored procedures.
+    - Migrated `DriverController` to use `ResponseEntity.of()` for cleaner `Optional` handling.
+  - Observations: Encountered `NullPointerException` in `BatchService` due to non-Spring managed instances; reinforced the rule of avoiding the `new` keyword for Spring-managed beans.
+---
 ## Guidelines / Best practices
 - Append new entries at the top; do not rewrite history.
 - Include exact commands and any error output when blocked.

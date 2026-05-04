@@ -26,22 +26,33 @@ public class RawMaterialInventoryStorageDao {
     // Maps the database row directly to your RawMaterialInventoryStorage model
     private final RowMapper<RawMaterialInventoryStorage> STORAGE_ROW_MAPPER = (rs, rowNum) -> {
         RawMaterialInventoryStorage storage = new RawMaterialInventoryStorage();
-        storage.setId(rs.getInt("id"));
+        storage.setR_storage_unit_id(rs.getInt("r_storage_unit_id"));
 
-        // Using getObject to safely handle potential database NULLs mapped to Java Float objects
-        storage.setCapacity(rs.getObject("capacity", Float.class));
-        storage.setQuantity_stored(rs.getObject("quantity_stored", Float.class));
+        java.math.BigDecimal capacityBd = rs.getBigDecimal("capacity");
+        if (capacityBd != null) {
+            storage.setCapacity(capacityBd.floatValue());
+        } else {
+            storage.setCapacity(null);
+        }
+
+// Safely extract quantity_stored
+        java.math.BigDecimal quantityBd = rs.getBigDecimal("quantity_stored");
+        if (quantityBd != null) {
+            storage.setQuantity_stored(quantityBd.floatValue());
+        } else {
+            storage.setQuantity_stored(null);
+        }
 
         return storage;
     };
 
     public List<RawMaterialInventoryStorage> findAll() {
-        String sql = "SELECT id, capacity, quantity_stored FROM raw_material_inventory_storage";
+        String sql = "SELECT r_storage_unit_id, capacity, quantity_stored FROM raw_material_inventory_storage";
         return jdbc.query(sql, STORAGE_ROW_MAPPER);
     }
 
     public Optional<RawMaterialInventoryStorage> findById(Integer id) {
-        String sql = "SELECT id, capacity, quantity_stored FROM raw_material_inventory_storage WHERE id = ?";
+        String sql = "SELECT r_storage_unit_id, capacity, quantity_stored FROM raw_material_inventory_storage WHERE r_storage_unit_id = ?";
         try {
             RawMaterialInventoryStorage storage = jdbc.queryForObject(sql, STORAGE_ROW_MAPPER, id);
             return Optional.ofNullable(storage);
@@ -74,16 +85,16 @@ public class RawMaterialInventoryStorageDao {
 
         Number key = keyHolder.getKey();
         if (key != null) {
-            storage.setId(key.intValue());
+            storage.setR_storage_unit_id(key.intValue());
         }
         return storage;
     }
 
     public RawMaterialInventoryStorage save(RawMaterialInventoryStorage storage) {
         // If it already has an ID, update it. Otherwise, insert it.
-        if (storage.getId() != null && storage.getId() > 0) {
-            String sql = "UPDATE raw_material_inventory_storage SET capacity = ?, quantity_stored = ? WHERE id = ?";
-            jdbc.update(sql, storage.getCapacity(), storage.getQuantity_stored(), storage.getId());
+        if (storage.getR_storage_unit_id() != null && storage.getR_storage_unit_id() > 0) {
+            String sql = "UPDATE raw_material_inventory_storage SET capacity = ?, quantity_stored = ? WHERE r_storage_unit_id = ?";
+            jdbc.update(sql, storage.getCapacity(), storage.getQuantity_stored(), storage.getR_storage_unit_id());
             return storage;
         } else {
             return insert(storage);
@@ -91,12 +102,12 @@ public class RawMaterialInventoryStorageDao {
     }
 
     public void deleteById(Integer id) {
-        String sql = "DELETE FROM raw_material_inventory_storage WHERE id = ?";
+        String sql = "DELETE FROM raw_material_inventory_storage WHERE r_storage_unit_id = ?";
         jdbc.update(sql, id);
     }
 
     public boolean existsById(Integer id) {
-        String sql = "SELECT COUNT(*) FROM raw_material_inventory_storage WHERE id = ?";
+        String sql = "SELECT COUNT(*) FROM raw_material_inventory_storage WHERE r_storage_unit_id = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
     }

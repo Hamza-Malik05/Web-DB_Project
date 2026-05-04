@@ -24,7 +24,7 @@ public class CustomerDao {
     private final RowMapper<Customer> ROW_MAPPER = (rs, rowNum) -> {
         Customer c = new Customer();
         c.setCustomer_id(rs.getObject("customer_id") != null ? rs.getInt("customer_id") : null);
-        c.setCustomer_name(rs.getString("name"));
+        c.setCustomer_name(rs.getString("customer_name"));
         c.setPhone(rs.getString("phone"));
         c.setEmail(rs.getString("email"));
         c.setAddress(rs.getString("address"));
@@ -32,12 +32,12 @@ public class CustomerDao {
     };
 
     public List<Customer> findAll() {
-        String sql = "SELECT customer_id, name, phone, email, address FROM customer";
+        String sql = "SELECT customer_id, customer_name, phone, email, address FROM customers";
         return jdbc.query(sql, ROW_MAPPER);
     }
 
     public Optional<Customer> findById(Integer id) {
-        String sql = "SELECT customer_id, name, phone, email, address FROM customer WHERE customer_id = ?";
+        String sql = "SELECT customer_id, customer_name, phone, email, address FROM customers WHERE customer_id = ?";
         try {
             Customer c = jdbc.queryForObject(sql, ROW_MAPPER, id);
             return Optional.ofNullable(c);
@@ -48,11 +48,12 @@ public class CustomerDao {
 
     public Customer save(Customer customer) {
         if (customer.getCustomer_id() == null) {
-            final String insertSql = "INSERT INTO customer (name, phone, email, address) VALUES (?, ?, ?, ?)";
+            final String insertSql = "INSERT INTO customers (customer_name, phone, email, address) VALUES (?, ?, ?, ?)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbc.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+                // Explicitly name the primary key column
+                PreparedStatement ps = connection.prepareStatement(insertSql, new String[]{"customer_id"});
                 ps.setString(1, customer.getCustomer_name());
                 ps.setString(2, customer.getPhone());
                 ps.setString(3, customer.getEmail());
@@ -66,7 +67,7 @@ public class CustomerDao {
             }
             return customer;
         } else {
-            final String updateSql = "UPDATE customer SET name = ?, phone = ?, email = ?, address = ? WHERE customer_id = ?";
+            final String updateSql = "UPDATE customers SET customer_name = ?, phone = ?, email = ?, address = ? WHERE customer_id = ?";
             jdbc.update(updateSql,
                     customer.getCustomer_name(),
                     customer.getPhone(),
@@ -78,7 +79,7 @@ public class CustomerDao {
     }
 
     public int deleteById(Integer id) {
-        String sql = "DELETE FROM customer WHERE customer_id = ?";
+        String sql = "DELETE FROM customers WHERE customer_id = ?";
         return jdbc.update(sql, id);
     }
 }

@@ -1,6 +1,7 @@
 package com.plant_management.service;
 
 import com.plant_management.dto.BatchRequestDTO;
+import com.plant_management.dao.ProductDao;
 import com.plant_management.model.*;
 import com.plant_management.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import java.util.Optional;
 
 @Service
 public class BatchService {
+    public BatchService(){
+    }
 
     @Autowired
     private BatchDao batchDao; // replaced BatchRepository

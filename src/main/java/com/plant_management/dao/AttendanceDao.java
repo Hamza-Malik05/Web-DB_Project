@@ -1,6 +1,7 @@
 package com.plant_management.dao;
 
 import com.plant_management.model.Attendance;
+import com.plant_management.model.Employee; // NEW: Imported Employee model
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,6 +19,14 @@ public class AttendanceDao {
 
     private final JdbcTemplate jdbc;
 
+    // NEW: A base SQL query that joins the employee table to fetch all necessary data in one trip.
+    private final String BASE_SELECT_SQL =
+            "SELECT a.attendance_id, a.employee_id, a.date, a.clock_in, a.clock_out, a.status, " +
+                    "e.dept_id, e.first_name, e.last_name, e.date_of_birth, e.cnic, e.email, " +
+                    "e.designation, e.address, e.gender, e.absences, e.leaves " +
+                    "FROM attendance a " +
+                    "LEFT JOIN employee e ON a.employee_id = e.employee_id ";
+
     public AttendanceDao(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
@@ -25,8 +34,48 @@ public class AttendanceDao {
     private final RowMapper<Attendance> ATTENDANCE_ROW_MAPPER = (rs, rowNum) -> {
         Attendance a = new Attendance();
         a.setAttendance_id(rs.getObject("attendance_id") != null ? rs.getInt("attendance_id") : null);
-        // avoid a hard dependency on Employee DAO here; set to null or load via EmployeeDao if required
-        a.setEmployee(null);
+
+        // NEW: Check if there is an employee attached to this attendance record
+        // If so, map all the employee attributes directly from the joined ResultSet
+        if (rs.getObject("employee_id") != null) {
+            Employee employee = new Employee();
+            employee.setEmployee_id(rs.getInt("employee_id"));
+            employee.setDept_id(rs.getObject("dept_id") != null ? rs.getInt("dept_id") : null);
+            employee.setFirst_name(rs.getString("first_name"));
+            employee.setLast_name(rs.getString("last_name"));
+
+            Date dob = rs.getDate("date_of_birth");
+            if (dob != null) {
+                employee.setDate_of_birth(dob);
+            }
+
+            employee.setCnic(rs.getString("cnic"));
+            employee.setEmail(rs.getString("email"));
+            employee.setDesignation(rs.getString("designation"));
+            employee.setAddress(rs.getString("address"));
+
+            // NEW: Correctly mapping the Gender Enum safely
+            String genderStr = rs.getString("gender");
+            if (genderStr != null) {
+                try {
+                    // Assuming your Enum is Employee.Gender or similar
+                    employee.setGender(Employee.Gender.valueOf(genderStr));
+                } catch (IllegalArgumentException ex) {
+                    employee.setGender(null);
+                }
+            } else {
+                employee.setGender(null);
+            }
+
+            employee.setAbsences(rs.getObject("absences") != null ? rs.getInt("absences") : null);
+            employee.setLeaves(rs.getObject("leaves") != null ? rs.getInt("leaves") : null);
+
+            a.setEmployee(employee);
+        } else {
+            a.setEmployee(null);
+        }
+
+        // Original Attendance mapping intact
         Date d = rs.getDate("date");
         a.setDate(d != null ? d.toLocalDate() : null);
         Time tIn = rs.getTime("clock_in");
@@ -47,7 +96,8 @@ public class AttendanceDao {
     };
 
     public Optional<Attendance> findById(Integer id) {
-        String sql = "SELECT attendance_id, employee_id, date, clock_in, clock_out, status FROM attendance WHERE attendance_id = ?";
+        // NEW: Appended WHERE clause to the joined base query
+        String sql = BASE_SELECT_SQL + "WHERE a.attendance_id = ?";
         try {
             Attendance a = jdbc.queryForObject(sql, ATTENDANCE_ROW_MAPPER, id);
             return Optional.ofNullable(a);
@@ -57,7 +107,8 @@ public class AttendanceDao {
     }
 
     public Optional<Attendance> findByEmployeeIdAndDate(Integer employeeId, LocalDate date) {
-        String sql = "SELECT attendance_id, employee_id, date, clock_in, clock_out, status FROM attendance WHERE employee_id = ? AND date = ?";
+        // NEW: Appended WHERE clause to the joined base query
+        String sql = BASE_SELECT_SQL + "WHERE a.employee_id = ? AND a.date = ?";
         try {
             Attendance a = jdbc.queryForObject(sql, ATTENDANCE_ROW_MAPPER, employeeId, Date.valueOf(date));
             return Optional.ofNullable(a);
@@ -67,26 +118,29 @@ public class AttendanceDao {
     }
 
     public List<Attendance> findByEmployeeId(Integer employeeId) {
-        String sql = "SELECT attendance_id, employee_id, date, clock_in, clock_out, status FROM attendance WHERE employee_id = ?";
+        // NEW: Appended WHERE clause to the joined base query
+        String sql = BASE_SELECT_SQL + "WHERE a.employee_id = ?";
         return jdbc.query(sql, ATTENDANCE_ROW_MAPPER, employeeId);
     }
 
     public List<Attendance> findAllByDate(LocalDate date) {
-        String sql = "SELECT attendance_id, employee_id, date, clock_in, clock_out, status FROM attendance WHERE date = ?";
+        // NEW: Appended WHERE clause to the joined base query
+        String sql = BASE_SELECT_SQL + "WHERE a.date = ?";
         return jdbc.query(sql, ATTENDANCE_ROW_MAPPER, Date.valueOf(date));
     }
 
     public List<Attendance> findAll() {
-        String sql = "SELECT attendance_id, employee_id, date, clock_in, clock_out, status FROM attendance";
-        return jdbc.query(sql, ATTENDANCE_ROW_MAPPER);
+        // NEW: Uses the joined base query
+        return jdbc.query(BASE_SELECT_SQL, ATTENDANCE_ROW_MAPPER);
     }
 
     public Attendance insert(Attendance attendance) {
-        final String sql = "INSERT INTO attendance (employee_id, date, clock_in, clock_out, status) VALUES (?, ?, ?, ?, ?)";
+        // Unchanged: Insert logic only needs the employee_id, which you already extract
+        final String sql = "INSERT INTO attendance (employee_id, date, clock_in, clock_out, status) VALUES (?, ?, ?, ?, ?::attendance_status)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"attendance_id"});
             if (attendance.getEmployee() != null && attendance.getEmployee().getEmployee_id() != null) {
                 ps.setObject(1, attendance.getEmployee().getEmployee_id(), Types.INTEGER);
             } else {
@@ -115,10 +169,11 @@ public class AttendanceDao {
     }
 
     public Attendance save(Attendance attendance) {
+        // Unchanged
         if (attendance.getAttendance_id() == null) {
             return insert(attendance);
         }
-        String sql = "UPDATE attendance SET employee_id = ?, date = ?, clock_in = ?, clock_out = ?, status = ? WHERE attendance_id = ?";
+        String sql = "UPDATE attendance SET employee_id = ?, date = ?, clock_in = ?, clock_out = ?, status = ?::attendance_status WHERE attendance_id = ?";
         Object empId = (attendance.getEmployee() != null && attendance.getEmployee().getEmployee_id() != null)
                 ? attendance.getEmployee().getEmployee_id() : null;
         jdbc.update(sql,
@@ -132,11 +187,13 @@ public class AttendanceDao {
     }
 
     public void deleteById(Integer id) {
+        // Unchanged
         String sql = "DELETE FROM attendance WHERE attendance_id = ?";
         jdbc.update(sql, id);
     }
 
     public boolean existsById(Integer id) {
+        // Unchanged
         String sql = "SELECT COUNT(*) FROM attendance WHERE attendance_id = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;

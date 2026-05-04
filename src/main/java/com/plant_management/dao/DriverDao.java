@@ -52,10 +52,7 @@ public class DriverDao {
 
     public List<Driver> findAll() {
         // Join to bring employee columns into the result set
-        String sql = "SELECT d.driver_id, d.employee_id, d.license_no, " +
-                "e.first_name, e.last_name, e.cnic " +
-                "FROM driver d " +
-                "LEFT JOIN employee e ON d.employee_id = e.employee_id";
+        String sql = "SELECT * FROM v_all_drivers";
         return jdbc.query(sql, ROW_MAPPER);
     }
 
@@ -76,7 +73,7 @@ public class DriverDao {
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbc.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(insertSql, new String[]{"driver_id"});
                 if (driver.getEmployee() != null && driver.getEmployee().getEmployee_id() != null) {
                     ps.setObject(1, driver.getEmployee().getEmployee_id(), Types.INTEGER);
                 } else {

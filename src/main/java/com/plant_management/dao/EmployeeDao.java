@@ -65,11 +65,11 @@ public class EmployeeDao {
     }
 
     public Employee insert(Employee employee) {
-        String sql = "INSERT INTO employee (dept_id, first_name, last_name, date_of_birth, cnic, email, designation, address, gender, absences, leaves) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO employee (dept_id, first_name, last_name, date_of_birth, cnic, email, designation, address, gender, absences, leaves) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?::gender_type, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         PreparedStatementCreator psc = connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"employee_id"});
             ps.setObject(1, employee.getDept_id());
             ps.setString(2, employee.getFirst_name());
             ps.setString(3, employee.getLast_name());
@@ -93,7 +93,7 @@ public class EmployeeDao {
     }
 
     public int update(Employee employee) {
-        String sql = "UPDATE employee SET dept_id = ?, first_name = ?, last_name = ?, date_of_birth = ?, cnic = ?, email = ?, designation = ?, address = ?, gender = ?, absences = ?, leaves = ? WHERE employee_id = ?";
+        String sql = "UPDATE employee SET dept_id = ?, first_name = ?, last_name = ?, date_of_birth = ?, cnic = ?, email = ?, designation = ?, address = ?, gender = ?::gender_type, absences = ?, leaves = ? WHERE employee_id = ?";
         return jdbcTemplate.update(sql,
                 employee.getDept_id(),
                 employee.getFirst_name(),

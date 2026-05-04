@@ -12,7 +12,7 @@ import lombok.*;
 public class RawMaterialInventoryStorage {
 
 
-    private Integer id;
+    private Integer r_storage_unit_id;
 
     private Float capacity;
 

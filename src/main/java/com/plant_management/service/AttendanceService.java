@@ -128,17 +128,27 @@ public class AttendanceService {
 
     @Transactional
     public Attendance markAbsent(Attendance attendance) {
+        Employee employee = attendance.getEmployee();
+
+        // 1. Guard against a null employee (prevents NPE on employee.getEmployee_id())
+        if (employee == null) {
+            throw new RuntimeException("Cannot mark absent: No employee attached to this attendance record.");
+        }
+
         log.info("Marking employee {} as absent for date {}",
-                attendance.getEmployee().getEmployee_id(),
+                employee.getEmployee_id(),
                 attendance.getDate());
 
         // Set attendance status to absent
         attendance.setStatus(Attendance.Status.absent);
 
-        // Get the employee and update their absence count
-        Employee employee = attendance.getEmployee();
-        employee.setAbsences(employee.getAbsences() + 1);
-        employee.setLeaves(employee.getLeaves() - 1);
+        // 2. Safely handle potential nulls to prevent unboxing NullPointerExceptions
+        int currentAbsences = employee.getAbsences() != null ? employee.getAbsences() : 0;
+        int currentLeaves = employee.getLeaves() != null ? employee.getLeaves() : 21; // 21 is your DB default
+
+        employee.setAbsences(currentAbsences + 1);
+        employee.setLeaves(currentLeaves - 1);
+
         employeeDao.update(employee);
 
         log.info("Updated employee {} absence count to {} and leaves to {}",

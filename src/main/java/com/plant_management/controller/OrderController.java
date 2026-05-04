@@ -1,6 +1,8 @@
 package com.plant_management.controller;
 
+import com.plant_management.dao.ProductDao;
 import com.plant_management.dto.OrderRequestDTO;
+import com.plant_management.model.Driver;
 import com.plant_management.model.Order;
 import com.plant_management.model.Products;
 import com.plant_management.service.BatchService;
@@ -22,7 +24,12 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-    BatchService batchService = new BatchService();
+    private final BatchService batchService;
+
+    // Inject it here!
+    public OrderController(BatchService batchService) {
+        this.batchService = batchService;
+    }
 
     @PostMapping
     public ResponseEntity<String> createOrder(@RequestBody OrderRequestDTO request) {
@@ -35,11 +42,12 @@ public class OrderController {
         return orderService.getAllOrders();
     }
 
-    @GetMapping("/{orderId}")
-    public Optional<Order> getOrderById(@PathVariable int orderId) {
-        return orderService.getOrderById(orderId);
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getDriverById(@PathVariable Integer id) {
+        return orderService.getOrderById(id)
+                .map(order -> ResponseEntity.ok(order))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
     @DeleteMapping("/{orderId}")
     public void deleteOrder(@PathVariable int orderId) {
         orderService.deleteOrder(orderId);

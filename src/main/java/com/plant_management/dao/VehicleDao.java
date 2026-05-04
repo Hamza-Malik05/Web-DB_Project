@@ -9,7 +9,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
@@ -26,21 +25,31 @@ public class VehicleDao {
     private final RowMapper<Vehicle> VEHICLE_ROW_MAPPER = (rs, rowNum) -> {
         Vehicle v = new Vehicle();
         v.setVehicle_id(rs.getInt("vehicle_id"));
-        v.setType(rs.getString("type"));
         v.setLicense_plate(rs.getString("license_plate"));
         v.setModel(rs.getString("model"));
 
         // Use getObject to safely handle potential database NULLs mapped to Java Float objects
         v.setCapacity(rs.getObject("capacity", Float.class));
 
-        // Safely parse the enum from the database string
+        // 1. Safely Map Vehicle Type Enum
+        String typeStr = rs.getString("type");
+        if (typeStr != null) {
+            for (Vehicle.VehicleType typeEnum : Vehicle.VehicleType.values()) {
+                if (typeEnum.name().equalsIgnoreCase(typeStr.replace(" ", "_"))) {
+                    v.setType(typeEnum);
+                    break;
+                }
+            }
+        }
+
+        // 2. Safely Map Vehicle Status Enum
         String statusStr = rs.getString("status");
         if (statusStr != null) {
-            try {
-                v.setStatus(Vehicle.Status.valueOf(statusStr.toLowerCase()));
-            } catch (IllegalArgumentException e) {
-                // If there's an unknown status in the DB, handle or leave null
-                v.setStatus(null);
+            for (Vehicle.Status statusEnum : Vehicle.Status.values()) {
+                if (statusEnum.name().equalsIgnoreCase(statusStr.replace(" ", "_"))) {
+                    v.setStatus(statusEnum);
+                    break;
+                }
             }
         }
 
@@ -48,12 +57,12 @@ public class VehicleDao {
     };
 
     public List<Vehicle> findAll() {
-        String sql = "SELECT vehicle_id, type, license_plate, model, capacity, status FROM vehicle";
+        String sql = "SELECT vehicle_id, type, license_plate, model, capacity, status FROM vehicles";
         return jdbc.query(sql, VEHICLE_ROW_MAPPER);
     }
 
     public Optional<Vehicle> findById(Integer id) {
-        String sql = "SELECT vehicle_id, type, license_plate, model, capacity, status FROM vehicle WHERE vehicle_id = ?";
+        String sql = "SELECT vehicle_id, type, license_plate, model, capacity, status FROM vehicles WHERE vehicle_id = ?";
         try {
             Vehicle v = jdbc.queryForObject(sql, VEHICLE_ROW_MAPPER, id);
             return Optional.ofNullable(v);
@@ -63,12 +72,20 @@ public class VehicleDao {
     }
 
     public Vehicle insert(Vehicle vehicle) {
-        final String sql = "INSERT INTO vehicle (type, license_plate, model, capacity, status) VALUES (?, ?, ?, ?, ?)";
+        // Explicitly cast the enums with ?::vehicle_type and ?::vehicle_status
+        final String sql = "INSERT INTO vehicles (type, license_plate, model, capacity, status) VALUES (?::vehicle_type, ?, ?, ?, ?::vehicle_status)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, vehicle.getType());
+            // PostgreSQL fix for returning keys
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"vehicle_id"});
+
+            if (vehicle.getType() != null) {
+                ps.setString(1, vehicle.getType().name());
+            } else {
+                ps.setNull(1, Types.VARCHAR);
+            }
+
             ps.setString(2, vehicle.getLicense_plate());
             ps.setString(3, vehicle.getModel());
 
@@ -96,11 +113,13 @@ public class VehicleDao {
 
     public Vehicle save(Vehicle vehicle) {
         if (vehicle.getVehicle_id() != null && vehicle.getVehicle_id() > 0) {
-            String sql = "UPDATE vehicle SET type = ?, license_plate = ?, model = ?, capacity = ?, status = ? WHERE vehicle_id = ?";
+            // Explicitly cast the enums for the update query
+            String sql = "UPDATE vehicles SET type = ?::vehicle_type, license_plate = ?, model = ?, capacity = ?, status = ?::vehicle_status WHERE vehicle_id = ?";
 
+            String typeStr = vehicle.getType() != null ? vehicle.getType().name() : null;
             String statusStr = vehicle.getStatus() != null ? vehicle.getStatus().name() : null;
 
-            jdbc.update(sql, vehicle.getType(), vehicle.getLicense_plate(), vehicle.getModel(), vehicle.getCapacity(), statusStr, vehicle.getVehicle_id());
+            jdbc.update(sql, typeStr, vehicle.getLicense_plate(), vehicle.getModel(), vehicle.getCapacity(), statusStr, vehicle.getVehicle_id());
             return vehicle;
         } else {
             return insert(vehicle);
@@ -108,12 +127,12 @@ public class VehicleDao {
     }
 
     public void deleteById(Integer id) {
-        String sql = "DELETE FROM vehicle WHERE vehicle_id = ?";
+        String sql = "DELETE FROM vehicles WHERE vehicle_id = ?";
         jdbc.update(sql, id);
     }
 
     public boolean existsById(Integer id) {
-        String sql = "SELECT COUNT(*) FROM vehicle WHERE vehicle_id = ?";
+        String sql = "SELECT COUNT(*) FROM vehicles WHERE vehicle_id = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
     }
@@ -126,7 +145,8 @@ public class VehicleDao {
         if (status == null) {
             return List.of();
         }
-        String sql = "SELECT vehicle_id, type, license_plate, model, capacity, status FROM vehicle WHERE status = ?";
+        // Explicitly cast the parameter here as well
+        String sql = "SELECT vehicle_id, type, license_plate, model, capacity, status FROM vehicles WHERE status = ?::vehicle_status";
         return jdbc.query(sql, VEHICLE_ROW_MAPPER, status.name());
     }
 }

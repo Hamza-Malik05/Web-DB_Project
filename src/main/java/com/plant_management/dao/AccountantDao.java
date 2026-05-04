@@ -33,12 +33,12 @@ public class AccountantDao {
     };
 
     public List<Accountant> findAll() {
-        String sql = "SELECT accountant_id, employee_id, domain FROM accountants";
+        String sql = "SELECT accountant_id, employee_id, domain FROM accountant";
         return jdbc.query(sql, ACCOUNTANT_ROW_MAPPER);
     }
 
     public Optional<Accountant> findById(Integer id) {
-        String sql = "SELECT accountant_id, employee_id, domain FROM accountants WHERE accountant_id = ?";
+        String sql = "SELECT accountant_id, employee_id, domain FROM accountant WHERE accountant_id = ?";
         try {
             Accountant a = jdbc.queryForObject(sql, ACCOUNTANT_ROW_MAPPER, id);
             return Optional.ofNullable(a);
@@ -48,7 +48,7 @@ public class AccountantDao {
     }
 
     public Accountant insert(Accountant accountant) {
-        final String sql = "INSERT INTO accountants (employee_id, domain) VALUES (?, ?)";
+        final String sql = "INSERT INTO accountant (employee_id, domain) VALUES (?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
@@ -71,7 +71,7 @@ public class AccountantDao {
 
     public Accountant save(Accountant accountant) {
         if (accountant.getAccountant_id() > 0) {
-            String sql = "UPDATE accountants SET employee_id = ?, domain = ? WHERE accountant_id = ?";
+            String sql = "UPDATE accountant SET employee_id = ?, domain = ? WHERE accountant_id = ?";
             Object empId = (accountant.getEmployee() != null && accountant.getEmployee().getEmployee_id() != 0)
                     ? accountant.getEmployee().getEmployee_id() : null;
             jdbc.update(sql, empId, accountant.getDomain(), accountant.getAccountant_id());
@@ -82,12 +82,12 @@ public class AccountantDao {
     }
 
     public void deleteById(Integer id) {
-        String sql = "DELETE FROM accountants WHERE accountant_id = ?";
+        String sql = "DELETE FROM accountant WHERE accountant_id = ?";
         jdbc.update(sql, id);
     }
 
     public boolean existsById(Integer id) {
-        String sql = "SELECT COUNT(*) FROM accountants WHERE accountant_id = ?";
+        String sql = "SELECT COUNT(*) FROM accountant WHERE accountant_id = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
     }

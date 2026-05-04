@@ -50,7 +50,7 @@ public class DepartmentDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         PreparedStatementCreator psc = connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"dept_id"});
             ps.setString(1, department.getName());
             return ps;
         };

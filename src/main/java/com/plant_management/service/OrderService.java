@@ -57,16 +57,15 @@ public class OrderService {
             Customer customer = customersDao.findById(orderRequest.getCustomer_id())
                     .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-            Integer nextOrderId = orderDao.findMaxOrderId().orElse(0) + 1;
-
             Order order = new Order();
-            order.setOrder_id(nextOrderId);
+            // Do NOT set the order_id here. Let the DAO generate it via the INSERT statement.
             order.setCustomer_id(orderRequest.getCustomer_id());
             order.setEmployee_id(orderRequest.getEmployee_id());
             order.setOrder_date(LocalDate.parse(orderRequest.getOrder_date()));
-            order.setStatus("pending");
+            order.setStatus(Order.OrderStatus.pending); // Assuming you switched to the Enum!
             order.setAddress(customer.getAddress());
 
+            // This will now correctly trigger an INSERT and return the generated ID
             Order savedOrder = orderDao.save(order);
 
             for (OrderProductDTO productDTO : orderRequest.getProducts()) {
@@ -75,7 +74,7 @@ public class OrderService {
 
                 // Save order-product mapping
                 OrdersProducts op = new OrdersProducts();
-                op.setOrder_id(savedOrder.getOrder_id());
+                op.setOrder_id(savedOrder.getOrder_id()); // Uses the auto-generated ID
                 op.setProduct_id(productId);
                 op.setQuantity(quantityOrdered);
                 ordersProductsDao.save(op);
@@ -121,18 +120,18 @@ public class OrderService {
     }
 
     public List<Order> getPendingOrders() {
-        return orderDao.findByStatus("pending");
+        return orderDao.findByStatus(Order.OrderStatus.valueOf("pending"));
     }
 
     public List<Order> getInDeliveryOrders() {
-        return orderDao.findByStatus("in_delivery");
+        return orderDao.findByStatus(Order.OrderStatus.valueOf("shipped"));
     }
 
     public List<Order> getDeliveredOrders() {
-        return orderDao.findByStatus("delivered");
+        return orderDao.findByStatus(Order.OrderStatus.valueOf("delivered"));
     }
 
     public List<Order> getCancelledOrders() {
-        return orderDao.findByStatus("cancelled");
+        return orderDao.findByStatus(Order.OrderStatus.valueOf("cancelled"));
     }
 }

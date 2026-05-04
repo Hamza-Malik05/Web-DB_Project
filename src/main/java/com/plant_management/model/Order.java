@@ -20,7 +20,18 @@ public class Order {
 
     private LocalDate order_date;
 
-    private String status;
+    // The attribute in your Order class
+    private OrderStatus status;
+
 
     private String address;
+
+    // The Enum definition
+    public enum OrderStatus {
+        pending,
+        processing,
+        delivered,
+        cancelled,
+        shipped
+    }
 }

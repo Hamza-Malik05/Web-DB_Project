@@ -12,7 +12,7 @@ AS $$
 DECLARE
     new_transaction_id INT;
 BEGIN
-    -- The RETURNING clause must be inside the INSERT statement
+    -- Insert Transaction
     INSERT INTO transactions (
         amount,
         type,
@@ -21,13 +21,14 @@ BEGIN
         payment_method
     ) VALUES (
                  p_amount,
-                 'withdrawal', -- Ensure this matches your transaction_type ENUM exactly
+                 'withdrawal',
                  CURRENT_DATE,
                  p_accountant_id,
-                 p_payment_method
+                 p_payment_method::payment_method_type -- FIX: Explicitly cast to enum
              )
-    RETURNING transaction_id INTO new_transaction_id; -- Moved inside the semicolon
+    RETURNING transaction_id INTO new_transaction_id;
 
+    -- Insert Bill
     INSERT INTO bills (
         transaction_id,
         bill_type,
@@ -35,7 +36,7 @@ BEGIN
         due_date
     ) VALUES (
                  new_transaction_id,
-                 p_bill_type,
+                 p_bill_type::bill_type,               -- FIX: Explicitly cast to enum
                  p_issue_date,
                  p_due_date
              );
@@ -170,8 +171,8 @@ CREATE OR REPLACE FUNCTION get_all_bill_details()
     RETURNS TABLE (
                       bill_id INT,
                       amount NUMERIC,
-                      issue_date TIMESTAMP,
-                      due_date TIMESTAMP,
+                      issue_date DATE,   -- Changed from TIMESTAMP to DATE
+                      due_date DATE,     -- Changed from TIMESTAMP to DATE
                       bill_type VARCHAR,
                       payment_method VARCHAR
                   )
@@ -184,3 +185,37 @@ BEGIN
                  JOIN transactions t ON b.transaction_id = t.transaction_id;
 END;
 $$;
+
+-- View to get full details of bills, including transaction and accountant information
+CREATE OR REPLACE VIEW v_bill_full_details AS
+SELECT
+    b.bill_id, b.issue_date, b.due_date, b.bill_type, b.transaction_id,
+    t.amount, t.type AS transaction_type, t.date_of_transaction, t.payment_method,
+    a.accountant_id, a.domain, a.employee_id
+FROM bills b
+         LEFT JOIN transactions t ON b.transaction_id = t.transaction_id
+         LEFT JOIN accountant a ON t.accountant_id = a.accountant_id;
+
+--View to get full details of deliveries, including order, vehicle and driver information
+CREATE OR REPLACE VIEW v_delivery_details AS
+SELECT
+    d.delivery_id, d.departure_time, d.delivery_time, d.order_id, d.vehicle_id, d.driver_id,
+    o.customer_id, o.employee_id AS order_employee_id, o.order_date, o.status AS order_status, o.address AS order_address,
+    v.type AS vehicle_type, v.license_plate, v.model, v.capacity, v.status AS vehicle_status,
+    dr.employee_id AS driver_employee_id, dr.license_no
+FROM deliveries d
+         LEFT JOIN orders o ON d.order_id = o.order_id
+         LEFT JOIN vehicles v ON d.vehicle_id = v.vehicle_id
+         LEFT JOIN driver dr ON d.driver_id = dr.driver_id;
+-- View to get full details of product inventory storage, including product information
+CREATE OR REPLACE VIEW v_product_inventory_storage AS
+SELECT
+    s.p_storage_unit_id,
+    s.capacity,
+    s.quantity_stored,
+    s.product_id,
+    p.name AS product_name,
+    p.unit_of_measurement,
+    p.price_per_unit
+FROM product_inventory_storage s
+         LEFT JOIN products p ON s.product_id = p.product_id;

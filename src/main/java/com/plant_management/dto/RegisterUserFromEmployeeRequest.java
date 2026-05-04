@@ -9,4 +9,5 @@ public class RegisterUserFromEmployeeRequest {
     private Integer employee_id;
     private String username;
     private String password;
+    private String role;
 }

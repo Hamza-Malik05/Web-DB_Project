@@ -12,7 +12,7 @@ public class Vehicle {
 
     private Integer vehicle_id;
 
-    private String type;
+    private VehicleType type;
 
     private String license_plate;
 
@@ -24,5 +24,15 @@ public class Vehicle {
 
     public enum Status {
         active, inactive
+    }
+
+
+    // The Enum definition
+    public enum VehicleType {
+        truck,
+        van,
+        loader,
+        bike,
+        other
     }
 }

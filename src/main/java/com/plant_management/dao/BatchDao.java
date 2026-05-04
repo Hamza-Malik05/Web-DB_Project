@@ -26,22 +26,23 @@ public class BatchDao {
         Batches b = new Batches();
         b.setBatch_id(rs.getObject("batch_id") != null ? rs.getInt("batch_id") : null);
 
+        // Map Product Info from the JOIN
         int productId = rs.getInt("product_id");
         if (!rs.wasNull()) {
             Products p = new Products();
             p.setProduct_id(productId);
+            p.setName(rs.getString("product_name")); // From JOIN
+            p.setUnit_of_measurement(rs.getString("unit_of_measurement")); // From JOIN
+            p.setPrice_per_unit(rs.getBigDecimal("price_per_unit")); // From JOIN
             b.setProduct(p);
-        } else {
-            b.setProduct(null);
         }
 
+        // Map Employee (as you had it before)
         int empId = rs.getInt("employee_id");
         if (!rs.wasNull()) {
             Employee e = new Employee();
             e.setEmployee_id(empId);
             b.setEmployee(e);
-        } else {
-            b.setEmployee(null);
         }
 
         b.setQuantity_used(rs.getObject("quantity_used") != null ? rs.getFloat("quantity_used") : null);
@@ -49,20 +50,23 @@ public class BatchDao {
         b.setStart_time(rs.getString("start_time"));
         b.setEnd_time(rs.getString("end_time"));
 
-        // storage unit ids - map to the nested objects if needed; leave null for now or extend model mapping
-        // Attempt to set raw/product storage objects only if those model setters exist; else leave as null
-        // Here we skip setting those complex fields to avoid tight coupling.
-
         return b;
     };
 
     public List<Batches> findAll() {
-        String sql = "SELECT batch_id, product_id, employee_id, quantity_used, quantity_produced, start_time, end_time, r_storage_unit_id, p_storage_unit_id FROM batches";
+        String sql = "SELECT b.*, " +
+                "p.name AS product_name, p.unit_of_measurement, p.price_per_unit " +
+                "FROM batches b " +
+                "LEFT JOIN products p ON b.product_id = p.product_id";
         return jdbc.query(sql, ROW_MAPPER);
     }
 
     public Optional<Batches> findById(Integer id) {
-        String sql = "SELECT batch_id, product_id, employee_id, quantity_used, quantity_produced, start_time, end_time, r_storage_unit_id, p_storage_unit_id FROM batches WHERE batch_id = ?";
+        String sql = "SELECT b.*, " +
+                "p.name AS product_name, p.unit_of_measurement, p.price_per_unit " +
+                "FROM batches b " +
+                "LEFT JOIN products p ON b.product_id = p.product_id " +
+                "WHERE b.batch_id = ?";
         try {
             Batches b = jdbc.queryForObject(sql, ROW_MAPPER, id);
             return Optional.ofNullable(b);
@@ -73,11 +77,14 @@ public class BatchDao {
 
     public Batches save(Batches batch) {
         if (batch.getBatch_id() == null) {
-            final String insertSql = "INSERT INTO batches (product_id, employee_id, quantity_used, quantity_produced, start_time, end_time, r_storage_unit_id, p_storage_unit_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            // FIX 1: Added ::timestamp to parameters 5 and 6
+            final String insertSql = "INSERT INTO batches (product_id, employee_id, quantity_used, quantity_produced, start_time, end_time, r_storage_unit_id, p_storage_unit_id) VALUES (?, ?, ?, ?, ?::timestamp, ?::timestamp, ?, ?)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbc.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+                // FIX 2: Explicitly ask for batch_id to prevent KeyHolder crashes
+                PreparedStatement ps = connection.prepareStatement(insertSql, new String[]{"batch_id"});
+
                 if (batch.getProduct() != null && batch.getProduct().getProduct_id() != null) {
                     ps.setObject(1, batch.getProduct().getProduct_id(), Types.INTEGER);
                 } else {
@@ -100,7 +107,7 @@ public class BatchDao {
                 }
                 ps.setString(5, batch.getStart_time());
                 ps.setString(6, batch.getEnd_time());
-                ps.setNull(7, Types.INTEGER); // r_storage_unit_id mapping omitted; set when model/field exists
+                ps.setNull(7, Types.INTEGER); // r_storage_unit_id mapping omitted
                 ps.setNull(8, Types.INTEGER); // p_storage_unit_id mapping omitted
                 return ps;
             }, keyHolder);
@@ -111,9 +118,11 @@ public class BatchDao {
             }
             return batch;
         } else {
-            final String updateSql = "UPDATE batches SET product_id = ?, employee_id = ?, quantity_used = ?, quantity_produced = ?, start_time = ?, end_time = ?, r_storage_unit_id = ?, p_storage_unit_id = ? WHERE batch_id = ?";
+            // FIX 1 (Update block): Added ::timestamp to start_time and end_time assignments
+            final String updateSql = "UPDATE batches SET product_id = ?, employee_id = ?, quantity_used = ?, quantity_produced = ?, start_time = ?::timestamp, end_time = ?::timestamp, r_storage_unit_id = ?, p_storage_unit_id = ? WHERE batch_id = ?";
             Object productId = (batch.getProduct() != null && batch.getProduct().getProduct_id() != null) ? batch.getProduct().getProduct_id() : null;
             Object employeeId = (batch.getEmployee() != null && batch.getEmployee().getEmployee_id() != null) ? batch.getEmployee().getEmployee_id() : null;
+
             jdbc.update(updateSql,
                     productId,
                     employeeId,
