@@ -24,7 +24,7 @@ BEGIN
                  'withdrawal',
                  CURRENT_DATE,
                  p_accountant_id,
-                 p_payment_method::payment_method_type -- FIX: Explicitly cast to enum
+                 LOWER(p_payment_method)::payment_method_type -- FIX: Convert to lowercase then cast
              )
     RETURNING transaction_id INTO new_transaction_id;
 
@@ -36,7 +36,7 @@ BEGIN
         due_date
     ) VALUES (
                  new_transaction_id,
-                 p_bill_type::bill_type,               -- FIX: Explicitly cast to enum
+                 LOWER(p_bill_type)::bill_type,               -- FIX: Convert to lowercase then cast
                  p_issue_date,
                  p_due_date
              );
@@ -219,3 +219,86 @@ SELECT
     p.price_per_unit
 FROM product_inventory_storage s
          LEFT JOIN products p ON s.product_id = p.product_id;
+-- View to get all drivers with their employee ids and license numbers
+-- 1. Remove the old version
+DROP VIEW IF EXISTS v_all_drivers;
+
+-- 2. Create the new version with the correct Join
+CREATE VIEW v_all_drivers AS
+SELECT
+    d.driver_id,
+    d.license_no,
+    e.employee_id,
+    e.first_name,
+    e.last_name,
+    e.cnic,
+    e.email
+FROM driver d
+         JOIN employee e ON d.employee_id = e.employee_id;
+
+-- View to get full details of sales, including transaction and accountant information
+CREATE OR REPLACE VIEW view_sales_details AS
+SELECT
+    s.sale_id,
+    s.order_id,
+    s.transaction_id,
+    s.units_sold,
+    s.status AS sale_status,
+    t.amount,
+    t.date_of_transaction,
+    t.payment_method,
+    e.first_name || ' ' || e.last_name AS accountant_name
+FROM sales s
+         JOIN transactions t ON s.transaction_id = t.transaction_id
+         JOIN accountant a ON t.accountant_id = a.accountant_id
+         JOIN employee e ON a.employee_id = e.employee_id;
+
+
+-- View to get full details of salaries, including transaction and employee information
+CREATE OR REPLACE VIEW view_salary_details AS
+SELECT
+    s.salary_id,
+    s.bonus,
+    s.fine,
+    s.employee_id,
+    e.first_name,
+    e.last_name,
+    e.designation,
+    t.transaction_id,
+    t.amount,
+    t.payment_method,
+    t.date_of_transaction,
+    t.type AS transaction_type
+FROM salaries s
+         JOIN employee e ON s.employee_id = e.employee_id
+         LEFT JOIN transactions t ON s.transaction_id = t.transaction_id;
+
+-- Procedure to create a salary record for an employee. This procedure will first create a transaction record and then use the generated transaction_id to create a salary record linked to that transaction.
+CREATE OR REPLACE PROCEDURE create_salary_record(
+    p_employee_id INT,
+    p_accountant_id INT,
+    p_amount DECIMAL,
+    p_bonus DECIMAL,
+    p_fine DECIMAL,
+    p_date DATE,
+    p_payment_method payment_method_type
+)
+    LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_transaction_id INT;
+BEGIN
+    -- 1. Insert into transactions table first
+    -- We set the type to 'EXPENSE' (or your equivalent enum value)
+    INSERT INTO transactions (amount, type, date_of_transaction, accountant_id, payment_method)
+    VALUES (p_amount + p_bonus - p_fine, 'salary', p_date, p_accountant_id, p_payment_method)
+    RETURNING transaction_id INTO v_transaction_id;
+
+    -- 2. Insert into salaries table using the new transaction_id
+    INSERT INTO salaries (transaction_id, employee_id, bonus, fine)
+    VALUES (v_transaction_id, p_employee_id, p_bonus, p_fine);
+
+    -- Log success (optional)
+    RAISE NOTICE 'Salary created for employee % with transaction %', p_employee_id, v_transaction_id;
+END;
+$$;

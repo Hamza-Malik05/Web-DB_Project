@@ -26,7 +26,9 @@ public class Transaction {
 
     public enum TransactionType {
         withdrawal,
-        deposit
+        deposit,
+        salary,
+
     }
 }
 

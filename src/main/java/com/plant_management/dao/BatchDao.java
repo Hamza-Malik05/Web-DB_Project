@@ -37,11 +37,15 @@ public class BatchDao {
             b.setProduct(p);
         }
 
-        // Map Employee (as you had it before)
+        // Map Employee with first and last name from JOIN
         int empId = rs.getInt("employee_id");
         if (!rs.wasNull()) {
             Employee e = new Employee();
             e.setEmployee_id(empId);
+            String first = rs.getString("employee_first_name");
+            String last = rs.getString("employee_last_name");
+            e.setFirst_name(first);
+            e.setLast_name(last);
             b.setEmployee(e);
         }
 
@@ -55,17 +59,21 @@ public class BatchDao {
 
     public List<Batches> findAll() {
         String sql = "SELECT b.*, " +
-                "p.name AS product_name, p.unit_of_measurement, p.price_per_unit " +
+                "p.name AS product_name, p.unit_of_measurement, p.price_per_unit, " +
+                "e.first_name AS employee_first_name, e.last_name AS employee_last_name " +
                 "FROM batches b " +
-                "LEFT JOIN products p ON b.product_id = p.product_id";
+                "LEFT JOIN products p ON b.product_id = p.product_id " +
+                "LEFT JOIN employee e ON b.employee_id = e.employee_id";
         return jdbc.query(sql, ROW_MAPPER);
     }
 
     public Optional<Batches> findById(Integer id) {
         String sql = "SELECT b.*, " +
-                "p.name AS product_name, p.unit_of_measurement, p.price_per_unit " +
+                "p.name AS product_name, p.unit_of_measurement, p.price_per_unit, " +
+                "e.first_name AS employee_first_name, e.last_name AS employee_last_name " +
                 "FROM batches b " +
                 "LEFT JOIN products p ON b.product_id = p.product_id " +
+                "LEFT JOIN employee e ON b.employee_id = e.employee_id " +
                 "WHERE b.batch_id = ?";
         try {
             Batches b = jdbc.queryForObject(sql, ROW_MAPPER, id);
@@ -77,12 +85,10 @@ public class BatchDao {
 
     public Batches save(Batches batch) {
         if (batch.getBatch_id() == null) {
-            // FIX 1: Added ::timestamp to parameters 5 and 6
             final String insertSql = "INSERT INTO batches (product_id, employee_id, quantity_used, quantity_produced, start_time, end_time, r_storage_unit_id, p_storage_unit_id) VALUES (?, ?, ?, ?, ?::timestamp, ?::timestamp, ?, ?)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbc.update(connection -> {
-                // FIX 2: Explicitly ask for batch_id to prevent KeyHolder crashes
                 PreparedStatement ps = connection.prepareStatement(insertSql, new String[]{"batch_id"});
 
                 if (batch.getProduct() != null && batch.getProduct().getProduct_id() != null) {
@@ -118,7 +124,6 @@ public class BatchDao {
             }
             return batch;
         } else {
-            // FIX 1 (Update block): Added ::timestamp to start_time and end_time assignments
             final String updateSql = "UPDATE batches SET product_id = ?, employee_id = ?, quantity_used = ?, quantity_produced = ?, start_time = ?::timestamp, end_time = ?::timestamp, r_storage_unit_id = ?, p_storage_unit_id = ? WHERE batch_id = ?";
             Object productId = (batch.getProduct() != null && batch.getProduct().getProduct_id() != null) ? batch.getProduct().getProduct_id() : null;
             Object employeeId = (batch.getEmployee() != null && batch.getEmployee().getEmployee_id() != null) ? batch.getEmployee().getEmployee_id() : null;

@@ -2,6 +2,7 @@ package com.plant_management.model;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -17,6 +18,6 @@ public class Purchase {
     private LocalDate date_of_purchase;
     private LocalDate delivery_date;
     private String unit_of_measurement;
-    private Float units_bought;
-    private Float price_per_unit = 30.0f;
+    private BigDecimal units_bought;
+    private BigDecimal price_per_unit = BigDecimal.valueOf(30.0);
 }

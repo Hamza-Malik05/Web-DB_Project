@@ -1,3 +1,4 @@
+// java
 package com.plant_management.dao;
 
 import com.plant_management.model.Purchase;
@@ -9,9 +10,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
@@ -20,50 +21,70 @@ import java.util.Optional;
 public class PurchaseDao {
 
     private final JdbcTemplate jdbc;
+    private final RowMapper<Purchase> PURCHASE_ROW_MAPPER;
 
     public PurchaseDao(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
+
+        // initialize mapper after jdbc is assigned
+        this.PURCHASE_ROW_MAPPER = (rs, rowNum) -> {
+            Purchase p = new Purchase();
+            p.setPurchase_id(rs.getInt("purchase_id"));
+
+            int supplierId = rs.getInt("supplier_id");
+            if (!rs.wasNull()) {
+                Supplier supplier = new Supplier();
+                supplier.setSupplier_id(supplierId);
+
+                // Try to read supplier_name from the resultset first.
+                String name = null;
+                try {
+                    name = rs.getString("supplier_name");
+                } catch (Exception ignored) {
+                    name = null;
+                }
+
+                // If supplier_name is missing/null in the resultset, fetch it directly using supplier_id.
+                if (name == null) {
+                    try {
+                        name = this.jdbc.queryForObject("SELECT name FROM suppliers WHERE supplier_id = ?", String.class, supplierId);
+                    } catch (EmptyResultDataAccessException ex) {
+                        name = null;
+                    }
+                }
+
+                if (name != null) {
+                    supplier.setName(name);
+                }
+                p.setSupplier(supplier);
+            } else {
+                p.setSupplier(null);
+            }
+
+            if (rs.getDate("date_of_purchase") != null) {
+                p.setDate_of_purchase(rs.getDate("date_of_purchase").toLocalDate());
+            }
+            if (rs.getDate("delivery_date") != null) {
+                p.setDelivery_date(rs.getDate("delivery_date").toLocalDate());
+            }
+
+            p.setUnit_of_measurement(rs.getString("unit_of_measurement"));
+            p.setUnits_bought(rs.getObject("units_bought", BigDecimal.class));
+            p.setPrice_per_unit(rs.getObject("price_per_unit", BigDecimal.class));
+
+            return p;
+        };
     }
 
-    private final RowMapper<Purchase> PURCHASE_ROW_MAPPER = (rs, rowNum) -> {
-        Purchase p = new Purchase();
-        p.setPurchase_id(rs.getInt("purchase_id"));
-
-        // Creating a dummy Supplier object to hold the foreign key ID
-        // Assuming your Supplier class has a 'setSupplier_id' method. Change if named differently!
-        int supplierId = rs.getInt("supplier_id");
-        if (!rs.wasNull()) {
-            Supplier supplier = new Supplier();
-            supplier.setSupplier_id(supplierId);
-            p.setSupplier(supplier);
-        } else {
-            p.setSupplier(null);
-        }
-
-        // Safely map SQL Dates to Java LocalDates
-        if (rs.getDate("date_of_purchase") != null) {
-            p.setDate_of_purchase(rs.getDate("date_of_purchase").toLocalDate());
-        }
-        if (rs.getDate("delivery_date") != null) {
-            p.setDelivery_date(rs.getDate("delivery_date").toLocalDate());
-        }
-
-        p.setUnit_of_measurement(rs.getString("unit_of_measurement"));
-
-        // Use getObject for Floats to avoid primitive 0.0 defaults if the DB value is NULL
-        p.setUnits_bought(rs.getObject("units_bought", Float.class));
-        p.setPrice_per_unit(rs.getObject("price_per_unit", Float.class));
-
-        return p;
-    };
-
     public List<Purchase> findAll() {
-        String sql = "SELECT purchase_id, supplier_id, date_of_purchase, delivery_date, unit_of_measurement, units_bought, price_per_unit FROM purchase";
+        String sql = "SELECT p.purchase_id, p.supplier_id, s.name AS supplier_name, p.date_of_purchase, p.delivery_date, p.unit_of_measurement, p.units_bought, p.price_per_unit " +
+                "FROM purchases p LEFT JOIN suppliers s ON p.supplier_id = s.supplier_id";
         return jdbc.query(sql, PURCHASE_ROW_MAPPER);
     }
 
     public Optional<Purchase> findById(Integer id) {
-        String sql = "SELECT purchase_id, supplier_id, date_of_purchase, delivery_date, unit_of_measurement, units_bought, price_per_unit FROM purchase WHERE purchase_id = ?";
+        String sql = "SELECT p.purchase_id, p.supplier_id, s.name AS supplier_name, p.date_of_purchase, p.delivery_date, p.unit_of_measurement, p.units_bought, p.price_per_unit " +
+                "FROM purchases p LEFT JOIN suppliers s ON p.supplier_id = s.supplier_id WHERE p.purchase_id = ?";
         try {
             Purchase p = jdbc.queryForObject(sql, PURCHASE_ROW_MAPPER, id);
             return Optional.ofNullable(p);
@@ -73,48 +94,42 @@ public class PurchaseDao {
     }
 
     public Purchase insert(Purchase purchase) {
-        final String sql = "INSERT INTO purchase (supplier_id, date_of_purchase, delivery_date, unit_of_measurement, units_bought, price_per_unit) VALUES (?, ?, ?, ?, ?, ?)";
+        final String sql = "INSERT INTO purchases (supplier_id, date_of_purchase, delivery_date, unit_of_measurement, units_bought, price_per_unit) VALUES (?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"purchase_id"});
 
-            // 1. Supplier ID
             if (purchase.getSupplier() != null && purchase.getSupplier().getSupplier_id() != null && purchase.getSupplier().getSupplier_id() > 0) {
                 ps.setObject(1, purchase.getSupplier().getSupplier_id(), Types.INTEGER);
             } else {
                 ps.setNull(1, Types.INTEGER);
             }
 
-            // 2. Date of Purchase
             if (purchase.getDate_of_purchase() != null) {
                 ps.setDate(2, Date.valueOf(purchase.getDate_of_purchase()));
             } else {
                 ps.setNull(2, Types.DATE);
             }
 
-            // 3. Delivery Date
             if (purchase.getDelivery_date() != null) {
                 ps.setDate(3, Date.valueOf(purchase.getDelivery_date()));
             } else {
                 ps.setNull(3, Types.DATE);
             }
 
-            // 4. Unit of Measurement
             ps.setString(4, purchase.getUnit_of_measurement());
 
-            // 5. Units Bought
             if (purchase.getUnits_bought() != null) {
-                ps.setFloat(5, purchase.getUnits_bought());
+                ps.setBigDecimal(5, purchase.getUnits_bought());
             } else {
-                ps.setNull(5, Types.FLOAT);
+                ps.setNull(5, Types.NULL);
             }
 
-            // 6. Price Per Unit
             if (purchase.getPrice_per_unit() != null) {
-                ps.setFloat(6, purchase.getPrice_per_unit());
+                ps.setBigDecimal(6, purchase.getPrice_per_unit());
             } else {
-                ps.setNull(6, Types.FLOAT);
+                ps.setNull(6, Types.NULL);
             }
 
             return ps;
@@ -127,9 +142,14 @@ public class PurchaseDao {
         return purchase;
     }
 
+    public BigDecimal recordNewPurchaseViaFunction(Integer supplierId, BigDecimal unitsBought) {
+        String functionCall = "SELECT record_new_purchase(?, ?)";
+        return jdbc.queryForObject(functionCall, BigDecimal.class, supplierId, unitsBought);
+    }
+
     public Purchase save(Purchase purchase) {
         if (purchase.getPurchase_id() != null && purchase.getPurchase_id() > 0) {
-            String sql = "UPDATE purchase SET supplier_id = ?, date_of_purchase = ?, delivery_date = ?, unit_of_measurement = ?, units_bought = ?, price_per_unit = ? WHERE purchase_id = ?";
+            String sql = "UPDATE purchases SET supplier_id = ?, date_of_purchase = ?, delivery_date = ?, unit_of_measurement = ?, units_bought = ?, price_per_unit = ? WHERE purchase_id = ?";
 
             Object supplierId = (purchase.getSupplier() != null && purchase.getSupplier().getSupplier_id() != null && purchase.getSupplier().getSupplier_id() > 0)
                     ? purchase.getSupplier().getSupplier_id() : null;
@@ -145,12 +165,12 @@ public class PurchaseDao {
     }
 
     public void deleteById(Integer id) {
-        String sql = "DELETE FROM purchase WHERE purchase_id = ?";
+        String sql = "DELETE FROM purchases WHERE purchase_id = ?";
         jdbc.update(sql, id);
     }
 
     public boolean existsById(Integer id) {
-        String sql = "SELECT COUNT(*) FROM purchase WHERE purchase_id = ?";
+        String sql = "SELECT COUNT(*) FROM purchases WHERE purchase_id = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
     }

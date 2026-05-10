@@ -1,4 +1,3 @@
-// java
 package com.plant_management.dao;
 
 import com.plant_management.model.User;
@@ -69,7 +68,8 @@ public class UserDao {
         // --- CRUD methods added below ---
 
         public User insert(User user) {
-                final String sql = "INSERT INTO users (employee_id, username, password, role) VALUES (?, ?, ?, ?)";
+                // ADDED ::role_type explicitly to tell PostgreSQL to cast the string to the custom enum
+                final String sql = "INSERT INTO users (employee_id, username, password, role) VALUES (?, ?, ?, ?::role_type)";
                 KeyHolder keyHolder = new GeneratedKeyHolder();
 
                 jdbc.update(connection -> {
@@ -111,7 +111,8 @@ public class UserDao {
                 if (user.getUser_id() == null) {
                         return insert(user);
                 }
-                String sql = "UPDATE users SET employee_id = ?, username = ?, password = ?, role = ? WHERE user_id = ?";
+                // ADDED ::role_type explicitly here as well
+                String sql = "UPDATE users SET employee_id = ?, username = ?, password = ?, role = ?::role_type WHERE user_id = ?";
                 Object empId = (user.getEmployee() != null && user.getEmployee().getEmployee_id() != null)
                         ? user.getEmployee().getEmployee_id() : null;
                 jdbc.update(sql, empId, user.getUsername(), user.getPassword(),

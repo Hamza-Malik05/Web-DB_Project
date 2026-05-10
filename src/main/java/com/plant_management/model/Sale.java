@@ -14,6 +14,8 @@ public class Sale {
 
     private int transaction_id;
 
+    private Transaction transaction;
+
     private int order_id;
 
     private float units_sold;

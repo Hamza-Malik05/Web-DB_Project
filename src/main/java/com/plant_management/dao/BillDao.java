@@ -183,7 +183,7 @@ public class BillDao {
 
     public List<BillResponseDTO> findAllBillDetails() {
         // Calls the database function we created
-        String sql = "SELECT * FROM get_all_bill_details()";
+        String sql = "SELECT * FROM v_bill_full_details";
         return jdbc.query(sql, BILL_DTO_ROW_MAPPER);
     }
 }

@@ -1,6 +1,7 @@
 package com.plant_management.dao;
 
 import com.plant_management.model.Accountant;
+import com.plant_management.model.Employee;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -26,19 +27,40 @@ public class AccountantDao {
     private final RowMapper<Accountant> ACCOUNTANT_ROW_MAPPER = (rs, rowNum) -> {
         Accountant a = new Accountant();
         a.setAccountant_id(rs.getInt("accountant_id"));
-        // employee mapping omitted here to avoid hard dependency; load via EmployeeDao if needed
-        a.setEmployee(null);
         a.setDomain(rs.getString("domain"));
+
+        // Map Nested Employee
+        int employeeId = rs.getInt("employee_id");
+        if (!rs.wasNull()) {
+            Employee emp = new Employee();
+            emp.setEmployee_id(employeeId);
+
+            // Map the employee details fetched from the JOIN
+            emp.setFirst_name(rs.getString("first_name"));
+            emp.setLast_name(rs.getString("last_name"));
+
+            a.setEmployee(emp);
+        } else {
+            a.setEmployee(null);
+        }
+
         return a;
     };
 
     public List<Accountant> findAll() {
-        String sql = "SELECT accountant_id, employee_id, domain FROM accountant";
+        // Updated to JOIN with the employee table to fetch names
+        String sql = "SELECT a.accountant_id, a.employee_id, a.domain, e.first_name, e.last_name " +
+                "FROM accountant a " +
+                "LEFT JOIN employee e ON a.employee_id = e.employee_id";
         return jdbc.query(sql, ACCOUNTANT_ROW_MAPPER);
     }
 
     public Optional<Accountant> findById(Integer id) {
-        String sql = "SELECT accountant_id, employee_id, domain FROM accountant WHERE accountant_id = ?";
+        // Updated to JOIN with the employee table to fetch names
+        String sql = "SELECT a.accountant_id, a.employee_id, a.domain, e.first_name, e.last_name " +
+                "FROM accountant a " +
+                "LEFT JOIN employee e ON a.employee_id = e.employee_id " +
+                "WHERE a.accountant_id = ?";
         try {
             Accountant a = jdbc.queryForObject(sql, ACCOUNTANT_ROW_MAPPER, id);
             return Optional.ofNullable(a);
@@ -52,7 +74,7 @@ public class AccountantDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"accountant_id"});
             if (accountant.getEmployee() != null && accountant.getEmployee().getEmployee_id() != 0) {
                 ps.setObject(1, accountant.getEmployee().getEmployee_id(), Types.INTEGER);
             } else {

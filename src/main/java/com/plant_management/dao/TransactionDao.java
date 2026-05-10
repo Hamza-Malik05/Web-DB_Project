@@ -65,11 +65,16 @@ public class TransactionDao {
 
     public Transaction save(Transaction tx) {
         if (tx.getTransaction_id() == null) {
-            final String insertSql = "INSERT INTO transactions (amount, type, date_of_transaction, accountant_id, payment_method) VALUES (?, ?, ?, ?, ?)";
+            // Added :: casts to the insert string
+            final String insertSql = "INSERT INTO transactions (amount, type, date_of_transaction, accountant_id, payment_method) " +
+                    "VALUES (?, ?, ?, ?, ?::payment_method_type)";
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbc.update(connection -> {
+                // Note: Standard PreparedStatement doesn't always love the :: syntax inside prepareStatement()
+                // If the code below throws an error, use the string without :: but ensure ps.setObject(index, value, Types.OTHER)
                 PreparedStatement ps = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+
                 if (tx.getAmount() != null) {
                     ps.setBigDecimal(1, tx.getAmount());
                 } else {
@@ -79,7 +84,7 @@ public class TransactionDao {
                 if (tx.getType() != null) {
                     ps.setString(2, tx.getType().name());
                 } else {
-                    ps.setNull(2, Types.VARCHAR);
+                    ps.setNull(2, Types.OTHER); // Use OTHER for null Enums
                 }
 
                 if (tx.getDate_of_transaction() != null) {
@@ -97,7 +102,7 @@ public class TransactionDao {
                 if (tx.getPayment_method() != null) {
                     ps.setString(5, tx.getPayment_method());
                 } else {
-                    ps.setNull(5, Types.VARCHAR);
+                    ps.setNull(5, Types.OTHER); // Use OTHER for null Enums
                 }
 
                 return ps;
@@ -109,8 +114,17 @@ public class TransactionDao {
             }
             return tx;
         } else {
-            final String updateSql = "UPDATE transactions SET amount = ?, type = ?, date_of_transaction = ?, accountant_id = ?, payment_method = ? WHERE transaction_id = ?";
+            // Fixed the Update SQL with explicit casts
+            final String updateSql = "UPDATE transactions SET " +
+                    "amount = ?, " +
+                    "type = ?, " +
+                    "date_of_transaction = ?, " +
+                    "accountant_id = ?, " +
+                    "payment_method = ?::payment_method_type " +
+                    "WHERE transaction_id = ?";
+
             Object accId = (tx.getAccountant() != null) ? tx.getAccountant().getAccountant_id() : null;
+
             jdbc.update(updateSql,
                     tx.getAmount(),
                     tx.getType() != null ? tx.getType().name() : null,

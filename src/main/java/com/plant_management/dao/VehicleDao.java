@@ -28,8 +28,9 @@ public class VehicleDao {
         v.setLicense_plate(rs.getString("license_plate"));
         v.setModel(rs.getString("model"));
 
-        // Use getObject to safely handle potential database NULLs mapped to Java Float objects
-        v.setCapacity(rs.getObject("capacity", Float.class));
+        // Fetch as BigDecimal (PostgreSQL's default for NUMERIC) and convert to Float safely
+        java.math.BigDecimal capacityValue = rs.getBigDecimal("capacity");
+        v.setCapacity(capacityValue != null ? capacityValue.floatValue() : null);
 
         // 1. Safely Map Vehicle Type Enum
         String typeStr = rs.getString("type");

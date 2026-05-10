@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class AttendanceDao {
+public class  AttendanceDao {
 
     private final JdbcTemplate jdbc;
 
