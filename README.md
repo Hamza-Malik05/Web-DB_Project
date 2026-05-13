@@ -9,11 +9,13 @@ This repository's initial commit is an ORM-based Java Spring Boot backend exposi
 
 Project layout
 --------------
+```text
 GrainSync/
-- `grainsync-frontend/` \# React + Vite Frontend
-- `grainsync-backend/`  \# Spring Boot Backend (current focus)
-- `Documentation.md`    \# Persistent, append-only progress log
-- `README.md`           \# This high-level overview
+├── grainsync-frontend/   # React + Vite Frontend
+├── grainsync-backend/    # Spring Boot Backend (current focus)
+├── Documentation.md      # Persistent, append-only progress log
+└── README.md             # This high-level overview
+```
 
 Tech stack
 ----------
@@ -60,7 +62,6 @@ Guidelines
 Contact / Ownership
 -------------------
 - Primary repo owner: `Hamza-Malik05`
+- Contributors: `SkinnyLadd`, `AbdullahSom`
 
-Changelog
----------
-- 2026-04-11: `README.md` created — initial template and pointer to `Documentation.md`.
+
