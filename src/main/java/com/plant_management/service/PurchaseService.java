@@ -1,48 +1,42 @@
 package com.plant_management.service;
 
-import com.plant_management.dto.PurchaseResponseDTO;
-import com.plant_management.entity.Purchase;
-import com.plant_management.repository.PurchaseRepository;
+import com.plant_management.dao.PurchaseDao;
+import com.plant_management.model.Purchase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class PurchaseService {
 
     @Autowired
-    private PurchaseRepository purchaseRepository;
+    private PurchaseDao purchaseDao;
 
-    public List<PurchaseResponseDTO> getAllPurchases() {
-        List<Purchase> purchases = purchaseRepository.findAll();
-
-        return purchases.stream()
-                .map(purchase -> new PurchaseResponseDTO(
-                        purchase.getPurchase_id(),
-                        purchase.getSupplier().getName(),
-                        purchase.getDate_of_purchase(),
-                        purchase.getDelivery_date(),
-                        purchase.getUnit_of_measurement(),
-                        purchase.getUnits_bought(),
-                        purchase.getPrice_per_unit(),
-                        purchase.getUnits_bought() * purchase.getPrice_per_unit()
-                ))
-                .collect(Collectors.toList());
+    public List<Purchase> getAllPurchases() {
+        // Returns the raw entity list, preserving the nested 'supplier' object
+        return purchaseDao.findAll();
     }
 
-
     public Optional<Purchase> getPurchaseById(Integer id) {
-        return purchaseRepository.findById(id);
+        return purchaseDao.findById(id);
     }
 
     public Purchase savePurchase(Purchase purchase) {
-        return purchaseRepository.save(purchase);
+        return purchaseDao.save(purchase);
     }
 
     public void deletePurchase(Integer id) {
-        purchaseRepository.deleteById(id);
+        purchaseDao.deleteById(id);
+    }
+
+    /**
+     * Calls DAO wrapper that invokes the database function record_new_purchase(...)
+     * Returns the total bill calculated by the DB function.
+     */
+    public BigDecimal recordNewPurchase(Integer supplierId, BigDecimal unitsBought) {
+        return purchaseDao.recordNewPurchaseViaFunction(supplierId, unitsBought);
     }
 }

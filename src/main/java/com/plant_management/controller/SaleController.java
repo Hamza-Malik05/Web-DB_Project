@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Sale;
+import com.plant_management.model.Sale;
 import com.plant_management.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/sales")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 public class SaleController {
 

@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.RawMaterialInventoryStorage;
+import com.plant_management.model.RawMaterialInventoryStorage;
 import com.plant_management.service.RawMaterialInventoryStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/storage-units")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 public class RawMaterialInventoryStorageController {
 

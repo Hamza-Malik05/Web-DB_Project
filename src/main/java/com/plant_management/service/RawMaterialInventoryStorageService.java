@@ -1,7 +1,7 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.RawMaterialInventoryStorage;
-import com.plant_management.repository.RawMaterialInventoryStorageRepository;
+import com.plant_management.model.RawMaterialInventoryStorage;
+import com.plant_management.dao.RawMaterialInventoryStorageDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
 public class RawMaterialInventoryStorageService {
 
     @Autowired
-    private RawMaterialInventoryStorageRepository repository;
+    private RawMaterialInventoryStorageDao repository;
 
     public List<RawMaterialInventoryStorage> getAllStorageUnits() {
         return repository.findAll();

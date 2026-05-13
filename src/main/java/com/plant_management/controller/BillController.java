@@ -2,7 +2,7 @@ package com.plant_management.controller;
 
 import com.plant_management.dto.BillRequestDTO;
 import com.plant_management.dto.BillResponseDTO;
-import com.plant_management.entity.Bill;
+import com.plant_management.model.Bill;
 import com.plant_management.service.BillService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bills")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 
 public class BillController {

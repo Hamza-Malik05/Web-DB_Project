@@ -1,9 +1,8 @@
 package com.plant_management.controller;
 
 import com.plant_management.dto.BatchRequestDTO;
-import com.plant_management.entity.Batches;
+import com.plant_management.model.Batches;
 import com.plant_management.service.BatchService;
-import org.hibernate.engine.jdbc.batch.spi.Batch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/batches")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 public class BatchController {
 

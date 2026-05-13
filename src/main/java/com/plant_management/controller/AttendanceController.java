@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Attendance;
+import com.plant_management.model.Attendance;
 import com.plant_management.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/attendance")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 
 public class AttendanceController {

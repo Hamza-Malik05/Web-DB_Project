@@ -1,7 +1,8 @@
 package com.plant_management.service;
 
-import com.plant_management.entity.Transaction;
-import com.plant_management.repository.TransactionRepository;
+import com.plant_management.dao.TransactionDao;
+import com.plant_management.model.Transaction;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,35 +11,35 @@ import java.util.Optional;
 @Service
 public class TransactionService {
 
-    private final TransactionRepository repository;
+    private final TransactionDao transactionDao;
 
-    public TransactionService(TransactionRepository repository) {
-        this.repository = repository;
+    public TransactionService(TransactionDao transactionDao) {
+        this.transactionDao = transactionDao;
     }
 
     public List<Transaction> getAllTransactions() {
-        return repository.findAll();
+        return transactionDao.findAll();
     }
 
     public Optional<Transaction> getTransactionById(Integer id) {
-        return repository.findById(id);
+        return transactionDao.findById(id);
     }
 
     public Transaction updateTransaction(Integer id, Transaction updatedTransaction) {
-        Optional<Transaction> optionalTransaction = repository.findById(id);
+        Optional<Transaction> optionalTransaction = transactionDao.findById(id);
         if (optionalTransaction.isPresent()) {
             updatedTransaction.setTransaction_id(id);
-            return repository.save(updatedTransaction);
+            return transactionDao.save(updatedTransaction);
         } else {
             return null;
         }
     }
 
     public Transaction createTransaction(Transaction transaction) {
-        return repository.save(transaction);
+        return transactionDao.save(transaction);
     }
 
     public void deleteTransaction(Integer id) {
-        repository.deleteById(id);
+        transactionDao.deleteById(id);
     }
 }

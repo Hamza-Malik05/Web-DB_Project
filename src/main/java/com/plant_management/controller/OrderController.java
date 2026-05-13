@@ -1,8 +1,10 @@
 package com.plant_management.controller;
 
+import com.plant_management.dao.ProductDao;
 import com.plant_management.dto.OrderRequestDTO;
-import com.plant_management.entity.Order;
-import com.plant_management.entity.Products;
+import com.plant_management.model.Driver;
+import com.plant_management.model.Order;
+import com.plant_management.model.Products;
 import com.plant_management.service.BatchService;
 import com.plant_management.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,20 +14,22 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@CrossOrigin(origins = "http://localhost:3000")
 
 
 public class OrderController {
 
     @Autowired
     private OrderService orderService;
-    BatchService batchService = new BatchService();
+    private final BatchService batchService;
+
+    // Inject it here!
+    public OrderController(BatchService batchService) {
+        this.batchService = batchService;
+    }
 
     @PostMapping
     public ResponseEntity<String> createOrder(@RequestBody OrderRequestDTO request) {
@@ -38,11 +42,12 @@ public class OrderController {
         return orderService.getAllOrders();
     }
 
-    @GetMapping("/{orderId}")
-    public Optional<Order> getOrderById(@PathVariable int orderId) {
-        return orderService.getOrderById(orderId);
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getDriverById(@PathVariable Integer id) {
+        return orderService.getOrderById(id)
+                .map(order -> ResponseEntity.ok(order))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
     @DeleteMapping("/{orderId}")
     public void deleteOrder(@PathVariable int orderId) {
         orderService.deleteOrder(orderId);

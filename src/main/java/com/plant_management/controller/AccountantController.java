@@ -1,6 +1,6 @@
 package com.plant_management.controller;
 
-import com.plant_management.entity.Accountant;
+import com.plant_management.model.Accountant;
 import com.plant_management.service.AccountantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/accountants")
-@CrossOrigin(origins = "https://grainsync.up.railway.app")
+@RequestMapping("/api/accountant")
+@CrossOrigin(origins = "http://localhost:3000")
 
 
 public class AccountantController {
